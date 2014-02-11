@@ -18,7 +18,7 @@ package org.ext4spring.parameter;
 import java.lang.reflect.Method;
 
 import org.ext4spring.parameter.exception.ParameterException;
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 
 /**
  * Turns the class and method metadata into parsed data
@@ -35,6 +35,6 @@ public interface ParameterResolver {
 	 * @return
 	 * @throws ParameterException
 	 */
-	public Metadata parse(Method method, Object[] invocationArgumnets) throws ParameterException;
+	public ParameterMetadata parse(Method method, Object[] invocationArgumnets) throws ParameterException;
 
 }

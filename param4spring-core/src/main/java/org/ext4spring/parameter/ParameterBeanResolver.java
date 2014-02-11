@@ -15,18 +15,32 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
+import java.lang.reflect.Field;
+
 import org.ext4spring.parameter.exception.ParameterException;
+import org.ext4spring.parameter.model.ParameterBeanMetadata;
 import org.ext4spring.parameter.model.ParameterMetadata;
 
 /**
- * Parameter related services. Uses a ParameterRepository for persistence
+ * Turns the parameter bean into parameter bean metadata
  * 
  * @author Peter Borbas
+ * 
  */
+public interface ParameterBeanResolver {
+    
+	/**
+	 * Resolves parameter bean metadata by the class of the bean
+	 * 
+	 * @throws ParameterException
+	 */
+	public ParameterBeanMetadata parse(Class<?> parameterClass) throws ParameterException;
 
-public interface ParameterService {
-
-    public Object read(ParameterMetadata metadata, Object methodReturnValue) throws ParameterException;
-
-    public void write(ParameterMetadata metadata, Object value) throws ParameterException;
+	/**
+	 * Finds the field in the parameter bean instance for the given parameter metadata object
+	 * @param parameterBean
+	 * @param parameterMetadata
+	 * @return
+	 */
+	public Field findFieldForParameter(Object parameterBean, ParameterMetadata parameterMetadata);
 }

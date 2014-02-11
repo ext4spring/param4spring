@@ -21,7 +21,7 @@ import org.ext4spring.parameter.annotation.Parameter;
 import org.ext4spring.parameter.annotation.ParameterBean;
 import org.ext4spring.parameter.annotation.ParameterQualifier;
 import org.ext4spring.parameter.converter.tv.TVConverter;
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.Operation;
 import org.junit.Assert;
 import org.junit.Test;
@@ -70,7 +70,7 @@ public class DefaultParameterResolverTest extends TestBase {
 
         Class notAnnotatedClass = Class.forName(AllPrimitivesParameterBean.class.getName());
         Method method;
-        Metadata metadata;
+        ParameterMetadata metadata;
 
         method = notAnnotatedClass.getMethod("getByte");
         metadata = defaultParameterResolver.parse(method,null);
@@ -164,7 +164,7 @@ public class DefaultParameterResolverTest extends TestBase {
         // getter
         Method notAnnotatedGetLongMethod = notAnnotatedClass.getMethod("getLongParam");
         DefaultParameterResolver defaultParameterResolver = new DefaultParameterResolver();
-        Metadata metadata = defaultParameterResolver.parse(notAnnotatedGetLongMethod,null);
+        ParameterMetadata metadata = defaultParameterResolver.parse(notAnnotatedGetLongMethod,null);
         Assert.assertEquals(null, metadata.getDefaultValue());
         Assert.assertEquals(Long.class, metadata.getTypeClass());
         Assert.assertEquals(Operation.GET, metadata.getOperation());
@@ -183,7 +183,7 @@ public class DefaultParameterResolverTest extends TestBase {
         Class annotatedClass = Class.forName(AnnotatedParameterBean.class.getName());
         Method annotatedLongMethod = annotatedClass.getMethod("getLongParam");
         DefaultParameterResolver defaultParameterResolver = new DefaultParameterResolver();
-        Metadata metadata = defaultParameterResolver.parse(annotatedLongMethod,null);
+        ParameterMetadata metadata = defaultParameterResolver.parse(annotatedLongMethod,null);
         Assert.assertEquals(null, metadata.getDefaultValue());
         Assert.assertEquals(Long.class, metadata.getTypeClass());
         Assert.assertEquals(Operation.GET, metadata.getOperation());

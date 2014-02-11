@@ -22,7 +22,7 @@ import org.ext4spring.parameter.converter.Converter;
  * 
  * @author Peter Borbas
  */
-public class Metadata {
+public class ParameterMetadata {
     private Class<?> typeClass;
     private Operation operation;
     private String domain;
@@ -147,7 +147,7 @@ public class Metadata {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        Metadata other = (Metadata) obj;
+        ParameterMetadata other = (ParameterMetadata) obj;
         if (domain == null) {
             if (other.domain != null) return false;
         } else if (!domain.equals(other.domain)) return false;

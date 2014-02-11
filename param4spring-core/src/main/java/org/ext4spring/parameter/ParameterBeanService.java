@@ -15,8 +15,6 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
-import java.util.Map;
-
 import org.ext4spring.parameter.exception.ParameterException;
 
 /**

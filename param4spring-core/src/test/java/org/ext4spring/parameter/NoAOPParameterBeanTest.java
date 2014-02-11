@@ -15,12 +15,8 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.sql.DataSource;
 
-import org.ext4spring.parameter.converter.json.JSONConverter;
 import org.ext4spring.parameter.example.ApplicationSettings;
 import org.junit.Assert;
 import org.junit.Test;

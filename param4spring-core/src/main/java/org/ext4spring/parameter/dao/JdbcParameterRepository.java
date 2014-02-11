@@ -20,7 +20,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -46,7 +46,7 @@ public class JdbcParameterRepository extends AbstractParameterRepository {
 	}
 
 	@Override
-	public boolean parameterExists(Metadata metadata) {
+	public boolean parameterExists(ParameterMetadata metadata) {
 		MapSqlParameterSource namedParameters = new MapSqlParameterSource();
 		namedParameters.addValue("domain", metadata.getDomain());
 		namedParameters.addValue("parameter", metadata.getFullParameterName());
@@ -55,7 +55,7 @@ public class JdbcParameterRepository extends AbstractParameterRepository {
 	}
 
 	@Override
-	public String getValue(Metadata metadata) {
+	public String getValue(ParameterMetadata metadata) {
 		MapSqlParameterSource namedParameters = new MapSqlParameterSource();
 		namedParameters.addValue("domain", metadata.getDomain());
 		namedParameters.addValue("parameter", metadata.getFullParameterName());
@@ -64,7 +64,7 @@ public class JdbcParameterRepository extends AbstractParameterRepository {
 	}
 
 	@Override
-	public void setValue(Metadata metadata, String value) {
+	public void setValue(ParameterMetadata metadata, String value) {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("domain", metadata.getDomain());
 		parameters.put("parameter", metadata.getFullParameterName());

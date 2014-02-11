@@ -24,7 +24,7 @@ import org.ext4spring.parameter.annotation.Parameter;
 import org.ext4spring.parameter.annotation.ParameterBean;
 import org.ext4spring.parameter.annotation.ParameterQualifier;
 import org.ext4spring.parameter.converter.Converter;
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.Operation;
 import org.springframework.stereotype.Component;
 
@@ -46,8 +46,8 @@ public class DefaultParameterResolver implements ParameterResolver {
     }
 
     @Override
-    public Metadata parse(Method method, Object[] invocationArgumnets) {
-        Metadata metadata = new Metadata();
+    public ParameterMetadata parse(Method method, Object[] invocationArgumnets) {
+        ParameterMetadata metadata = new ParameterMetadata();
         // domain
         metadata.setDomain(this.resolveDomain(method));
         // parameter name and operation
@@ -92,7 +92,7 @@ public class DefaultParameterResolver implements ParameterResolver {
         return annotation;
     }
 
-    protected void resolveQualifier(Metadata metadata, Method method, Object[] invocationArgumnets) {
+    protected void resolveQualifier(ParameterMetadata metadata, Method method, Object[] invocationArgumnets) {
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
         for (int paramIndex = 0; paramIndex < paramAnnotations.length; paramIndex++) {
             {

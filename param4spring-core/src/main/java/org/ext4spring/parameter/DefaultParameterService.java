@@ -27,7 +27,7 @@ import org.ext4spring.parameter.exception.ParameterConverterException;
 import org.ext4spring.parameter.exception.ParameterException;
 import org.ext4spring.parameter.exception.ParameterUndefinedException;
 import org.ext4spring.parameter.exception.RepositoryNotFoundException;
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.RepositoryMode;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Required;
@@ -47,7 +47,7 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
 
     @Override
     @Cacheable(value = Cache.CACHE_REGION, key = "#metadata")
-    public Object read(Metadata metadata, Object methodReturnValue) {
+    public Object read(ParameterMetadata metadata, Object methodReturnValue) {
         LOGGER.debug("Reading parameter:" + metadata);
         Object value = null;
         ParameterRepository repository = this.getReadableRepository(metadata);
@@ -87,7 +87,7 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
 
     @Override
     @CacheEvict(value = Cache.CACHE_REGION, key = "#metadata")
-    public void write(Metadata metadata, Object value) {
+    public void write(ParameterMetadata metadata, Object value) {
         ParameterRepository repository = this.getWriteableRepository(metadata);
         if (repository != null) {
             if (metadata.getConverter() == null) {
@@ -115,7 +115,7 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
         this.repositories = repositories;
     }
 
-    protected ParameterRepository getReadableRepository(Metadata metadata) throws ParameterException {
+    protected ParameterRepository getReadableRepository(ParameterMetadata metadata) throws ParameterException {
         boolean domainFound = false;
         for (ParameterRepository repository : this.repositories) {
             if (repository.getMode(metadata.getDomain()) != RepositoryMode.NONE) {
@@ -131,7 +131,7 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
         return null;
     }
 
-    protected ParameterRepository getWriteableRepository(Metadata metadata) throws ParameterException {
+    protected ParameterRepository getWriteableRepository(ParameterMetadata metadata) throws ParameterException {
         for (ParameterRepository repository : this.repositories) {
             switch (repository.getMode(metadata.getDomain())) {
                 case WRITE_ALL:

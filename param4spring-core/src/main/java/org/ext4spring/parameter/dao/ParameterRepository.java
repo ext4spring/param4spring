@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.ext4spring.parameter.dao;
 
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.RepositoryMode;
 
 /**
@@ -33,7 +33,7 @@ public interface ParameterRepository {
 	 * @param parameter
 	 * @return
 	 */
-	boolean parameterExists(Metadata metadata);
+	boolean parameterExists(ParameterMetadata metadata);
 
 	/**
 	 * Returns the current value of the parameter
@@ -42,7 +42,7 @@ public interface ParameterRepository {
 	 * @param parameterName
 	 * @return
 	 */
-	String getValue(Metadata metadata);
+	String getValue(ParameterMetadata metadata);
 
 	/**
 	 * Modifies the current value of the parameter
@@ -51,7 +51,7 @@ public interface ParameterRepository {
 	 * @param parameterName
 	 * @param value
 	 */
-	void setValue(Metadata metadata, String value);
+	void setValue(ParameterMetadata metadata, String value);
 
 	/**
 	 * @return The way the repository can handle the specified domain NONE: if

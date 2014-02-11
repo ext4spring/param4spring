@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ext4spring.parameter.exception.ParameterException;
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.RepositoryMode;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.core.io.Resource;
@@ -40,22 +40,22 @@ public class PropertyParameterRepository extends AbstractParameterRepository {
 	private Resource propertyResource;
         private static final Log LOGGER = LogFactory.getLog(PropertyParameterRepository.class);
 
-	protected String createKey(Metadata metadata) {
+	protected String createKey(ParameterMetadata metadata) {
 		return metadata.getDomain() + "." + metadata.getFullParameterName();
 	}
 
 	@Override
-	public String getValue(Metadata metadata) {
+	public String getValue(ParameterMetadata metadata) {
 		return this.properties.getProperty(this.createKey(metadata));
 	}
 
 	@Override
-	public boolean parameterExists(Metadata metadata) {
+	public boolean parameterExists(ParameterMetadata metadata) {
 		return this.properties.containsKey(this.createKey(metadata));
 	};
 
 	@Override
-	public void setValue(Metadata metadata, String value) {
+	public void setValue(ParameterMetadata metadata, String value) {
 		throw new ParameterException("Write not allowed on PropertyRepository. Parameter:"+metadata);
 	}
 

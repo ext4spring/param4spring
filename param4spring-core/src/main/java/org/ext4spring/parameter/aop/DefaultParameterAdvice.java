@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ext4spring.parameter.ParameterResolver;
 import org.ext4spring.parameter.ParameterService;
 import org.ext4spring.parameter.SpringComponents;
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.Operation;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -61,7 +61,7 @@ public class DefaultParameterAdvice implements ParameterAdvice,
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		LOGGER.trace("Parameter Advice invoked for method:"
 				+ invocation.getMethod());
-		Metadata metadata = this.parameterResolver
+		ParameterMetadata metadata = this.parameterResolver
 				.parse(invocation.getMethod(),invocation.getArguments());
 		if (Operation.GET.equals(metadata.getOperation())) {
 			return parameterService.read(metadata, invocation.proceed());

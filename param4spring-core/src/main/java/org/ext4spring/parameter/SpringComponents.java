@@ -23,7 +23,8 @@ package org.ext4spring.parameter;
  */
 public interface SpringComponents {
 	public static final String defaultParameterAdvice = "springParamDefaultParameterAdvice";
-	public static final String defaultParameterResolver = "springParamDefaultParameterResolver";
+        public static final String defaultParameterResolver = "springParamDefaultParameterResolver";
+        public static final String defaultParameterBeanResolver = "springParamDefaultParameterBeanResolver";
 	public static final String defaultConverterFactory = "springParamDefaultConverterFactory";
 	public static final String simpleConverterFactory = "springParamSimpleConverterFactory";
 	public static final String javaBeanPointcut = "springParamJavaBeanPointcut";

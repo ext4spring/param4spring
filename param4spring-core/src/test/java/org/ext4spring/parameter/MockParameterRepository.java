@@ -16,7 +16,7 @@
 package org.ext4spring.parameter;
 
 import org.ext4spring.parameter.dao.ParameterRepository;
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.RepositoryMode;
 
 public class MockParameterRepository implements ParameterRepository {
@@ -31,18 +31,18 @@ public class MockParameterRepository implements ParameterRepository {
 	}
 
 	@Override
-	public boolean parameterExists(Metadata metadata) {
+	public boolean parameterExists(ParameterMetadata metadata) {
 		return true;
 	}
 
 	@Override
-	public String getValue(Metadata metadata) {
+	public String getValue(ParameterMetadata metadata) {
 		getCounter++;
 		return value;
 	}
 
 	@Override
-	public void setValue(Metadata metadata, String value) {
+	public void setValue(ParameterMetadata metadata, String value) {
 		setCounter++;
 		this.value = value;
 	}

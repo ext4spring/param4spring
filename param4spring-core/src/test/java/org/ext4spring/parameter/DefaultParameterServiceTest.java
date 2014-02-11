@@ -24,7 +24,7 @@ import org.ext4spring.parameter.dao.ParameterRepository;
 import org.ext4spring.parameter.exception.ParameterException;
 import org.ext4spring.parameter.exception.ParameterUndefinedException;
 import org.ext4spring.parameter.exception.RepositoryNotFoundException;
-import org.ext4spring.parameter.model.Metadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.RepositoryMode;
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,8 +54,8 @@ public class DefaultParameterServiceTest extends TestBase {
     @Test
     public void testGetExistingParameter() {
         ParameterRepository mockParameterRepository = Mockito.mock(ParameterRepository.class);
-        Mockito.when(mockParameterRepository.getValue(Matchers.any(Metadata.class))).thenReturn("asd");
-        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(Metadata.class))).thenReturn(true);
+        Mockito.when(mockParameterRepository.getValue(Matchers.any(ParameterMetadata.class))).thenReturn("asd");
+        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(ParameterMetadata.class))).thenReturn(true);
         Mockito.when(mockParameterRepository.getMode(Matchers.anyString())).thenReturn(RepositoryMode.WRITE_ALL);
         LinkedHashSet<ParameterRepository> repos = new LinkedHashSet<ParameterRepository>();
         repos.add(mockParameterRepository);
@@ -64,7 +64,7 @@ public class DefaultParameterServiceTest extends TestBase {
         parameterService.setConverterFactory(mockConverterFactory);
         parameterService.setParameterRepositories(repos);
 
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
@@ -75,8 +75,8 @@ public class DefaultParameterServiceTest extends TestBase {
     @Test
     public void testGetExistingNullParameter() {
         ParameterRepository mockParameterRepository = Mockito.mock(ParameterRepository.class);
-        Mockito.when(mockParameterRepository.getValue(Matchers.any(Metadata.class))).thenReturn(null);
-        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(Metadata.class))).thenReturn(true);
+        Mockito.when(mockParameterRepository.getValue(Matchers.any(ParameterMetadata.class))).thenReturn(null);
+        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(ParameterMetadata.class))).thenReturn(true);
         Mockito.when(mockParameterRepository.getMode(Matchers.anyString())).thenReturn(RepositoryMode.WRITE_ALL);
         LinkedHashSet<ParameterRepository> repos = new LinkedHashSet<ParameterRepository>();
         repos.add(mockParameterRepository);
@@ -85,7 +85,7 @@ public class DefaultParameterServiceTest extends TestBase {
         parameterService.setConverterFactory(mockConverterFactory);
         parameterService.setParameterRepositories(repos);
 
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setOptional(true);
@@ -97,8 +97,8 @@ public class DefaultParameterServiceTest extends TestBase {
     @Test
     public void testGetNotExistingParameter() {
         ParameterRepository mockParameterRepository = Mockito.mock(ParameterRepository.class);
-        Mockito.when(mockParameterRepository.getValue(Matchers.any(Metadata.class))).thenReturn(null);
-        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(Metadata.class))).thenReturn(false);
+        Mockito.when(mockParameterRepository.getValue(Matchers.any(ParameterMetadata.class))).thenReturn(null);
+        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(ParameterMetadata.class))).thenReturn(false);
         Mockito.when(mockParameterRepository.getMode(Matchers.anyString())).thenReturn(RepositoryMode.WRITE_ALL);
         LinkedHashSet<ParameterRepository> repos = new LinkedHashSet<ParameterRepository>();
         repos.add(mockParameterRepository);
@@ -107,7 +107,7 @@ public class DefaultParameterServiceTest extends TestBase {
         parameterService.setConverterFactory(mockConverterFactory);
         parameterService.setParameterRepositories(repos);
 
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
@@ -123,8 +123,8 @@ public class DefaultParameterServiceTest extends TestBase {
     @Test
     public void testGetNotExistingParametersDefaultValue() {
         ParameterRepository mockParameterRepository = Mockito.mock(ParameterRepository.class);
-        Mockito.when(mockParameterRepository.getValue(Matchers.any(Metadata.class))).thenReturn(null);
-        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(Metadata.class))).thenReturn(false);
+        Mockito.when(mockParameterRepository.getValue(Matchers.any(ParameterMetadata.class))).thenReturn(null);
+        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(ParameterMetadata.class))).thenReturn(false);
         Mockito.when(mockParameterRepository.getMode(Matchers.anyString())).thenReturn(RepositoryMode.WRITE_ALL);
         LinkedHashSet<ParameterRepository> repos = new LinkedHashSet<ParameterRepository>();
         repos.add(mockParameterRepository);
@@ -133,7 +133,7 @@ public class DefaultParameterServiceTest extends TestBase {
         parameterService.setConverterFactory(mockConverterFactory);
         parameterService.setParameterRepositories(repos);
 
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
@@ -145,8 +145,8 @@ public class DefaultParameterServiceTest extends TestBase {
     @Test
     public void testGetNotExistingParametersMethodReturnValue() {
         ParameterRepository mockParameterRepository = Mockito.mock(ParameterRepository.class);
-        Mockito.when(mockParameterRepository.getValue(Matchers.any(Metadata.class))).thenReturn(null);
-        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(Metadata.class))).thenReturn(false);
+        Mockito.when(mockParameterRepository.getValue(Matchers.any(ParameterMetadata.class))).thenReturn(null);
+        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(ParameterMetadata.class))).thenReturn(false);
         Mockito.when(mockParameterRepository.getMode(Matchers.anyString())).thenReturn(RepositoryMode.WRITE_ALL);
         LinkedHashSet<ParameterRepository> repos = new LinkedHashSet<ParameterRepository>();
         repos.add(mockParameterRepository);
@@ -155,7 +155,7 @@ public class DefaultParameterServiceTest extends TestBase {
         parameterService.setConverterFactory(mockConverterFactory);
         parameterService.setParameterRepositories(repos);
 
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
@@ -172,7 +172,7 @@ public class DefaultParameterServiceTest extends TestBase {
         parameterService.setConverterFactory(mockConverterFactory);
         parameterService.setParameterRepositories(repos);
 
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
@@ -194,7 +194,7 @@ public class DefaultParameterServiceTest extends TestBase {
         parameterService.setConverterFactory(mockConverterFactory);
         parameterService.setParameterRepositories(repos);
 
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
@@ -210,8 +210,8 @@ public class DefaultParameterServiceTest extends TestBase {
     @Test
     public void testSetParameter() {
         ParameterRepository mockParameterRepository = Mockito.mock(ParameterRepository.class);
-        Mockito.when(mockParameterRepository.getValue(Matchers.any(Metadata.class))).thenReturn("asd");
-        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(Metadata.class))).thenReturn(true);
+        Mockito.when(mockParameterRepository.getValue(Matchers.any(ParameterMetadata.class))).thenReturn("asd");
+        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(ParameterMetadata.class))).thenReturn(true);
         Mockito.when(mockParameterRepository.getMode(Matchers.anyString())).thenReturn(RepositoryMode.WRITE_ALL);
         LinkedHashSet<ParameterRepository> repos = new LinkedHashSet<ParameterRepository>();
         repos.add(mockParameterRepository);
@@ -220,7 +220,7 @@ public class DefaultParameterServiceTest extends TestBase {
         parameterService.setConverterFactory(mockConverterFactory);
         parameterService.setParameterRepositories(repos);
 
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
@@ -232,13 +232,13 @@ public class DefaultParameterServiceTest extends TestBase {
     private ParameterRepository createMockRepository(boolean paramExists, RepositoryMode repositoryMode) {
         ParameterRepository mockParameterRepository = Mockito.mock(ParameterRepository.class);
         Mockito.when(mockParameterRepository.getMode(Matchers.anyString())).thenReturn(repositoryMode);
-        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(Metadata.class))).thenReturn(paramExists);
+        Mockito.when(mockParameterRepository.parameterExists(Matchers.any(ParameterMetadata.class))).thenReturn(paramExists);
         return mockParameterRepository;
     }
 
     @Test
     public void testSelectReadRepository() {
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
@@ -262,7 +262,7 @@ public class DefaultParameterServiceTest extends TestBase {
 
     @Test
     public void testSelectWriteRepository() {
-        Metadata metadata = new Metadata();
+        ParameterMetadata metadata = new ParameterMetadata();
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
