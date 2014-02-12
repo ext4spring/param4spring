@@ -36,5 +36,7 @@ public interface ParameterResolver {
 	 * @throws ParameterException
 	 */
 	public ParameterMetadata parse(Method method, Object[] invocationArgumnets) throws ParameterException;
-
+	
+	public String getFieldNameByMethod(Method method);
+	
 }

@@ -24,12 +24,8 @@ import org.ext4spring.parameter.converter.Converter;
  */
 public class ParameterMetadata {
     private Class<?> typeClass;
-    private Operation operation;
     private String domain;
-    //The attribute name of the parameter (field name of Java Bean with capitalized letter)
     private String attribute;
-
-    //The parameter name of the parameter equals with the attribute name if a @Parameter doesn't override it 
     private String parameter;
     private String defaultValue;
     private Class<? extends Converter> converter;
@@ -37,6 +33,10 @@ public class ParameterMetadata {
     private boolean qualified;
     private String qualifier;
 
+    /**
+     * parameter name with its qualifier (if has one)
+     * @return
+     */
     public String getFullParameterName() {
         if (qualifier != null) {
             return parameter + "." + qualifier;
@@ -60,6 +60,7 @@ public class ParameterMetadata {
         this.domain = domain;
     }
 
+    //The attribute name of the parameter (field name of Java Bean with capitalized letter)
     public String getAttribute() {
         return attribute;
     }
@@ -68,20 +69,13 @@ public class ParameterMetadata {
         this.attribute = attribute;
     }
 
+    //The parameter name of the parameter equals with the attribute name if a @Parameter doesn't override it 
     public String getParameter() {
         return parameter;
     }
 
     public void setParameter(String parameter) {
         this.parameter = parameter;
-    }
-
-    public Operation getOperation() {
-        return operation;
-    }
-
-    public void setOperation(Operation operation) {
-        this.operation = operation;
     }
 
     public Class<?> getTypeClass() {
@@ -120,7 +114,7 @@ public class ParameterMetadata {
 
     @Override
     public String toString() {
-        return "Metadata [typeClass=" + typeClass + ", operation=" + operation + ", domain=" + domain + ", attribute=" + attribute + ", parameter=" + parameter + ", defaultValue=" + defaultValue
+        return "Metadata [typeClass=" + typeClass + ", domain=" + domain + ", attribute=" + attribute + ", parameter=" + parameter + ", defaultValue=" + defaultValue
                 + ", converter=" + converter + ", optional=" + optional + ", qualified=" + qualified + ", qualifier=" + qualifier + "]";
     }
 

@@ -63,9 +63,10 @@ public class DefaultParameterAdvice implements ParameterAdvice,
 				+ invocation.getMethod());
 		ParameterMetadata metadata = this.parameterResolver
 				.parse(invocation.getMethod(),invocation.getArguments());
-		if (Operation.GET.equals(metadata.getOperation())) {
+		Operation operation=Operation.valueOfByMethodName(invocation.getMethod().getName());
+		if (Operation.READ.equals(operation)) {
 			return parameterService.read(metadata, invocation.proceed());
-		} else if (Operation.SET.equals(metadata.getOperation())) {
+		} else if (Operation.WRITE.equals(operation)) {
 			invocation.proceed();
 			parameterService.write(metadata, invocation.getArguments()[0]);
 		}

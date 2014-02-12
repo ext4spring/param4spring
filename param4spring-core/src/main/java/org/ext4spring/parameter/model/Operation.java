@@ -16,5 +16,16 @@
 package org.ext4spring.parameter.model;
 
 public enum Operation {
-	GET, SET;
+    READ, WRITE;
+
+    public static Operation valueOfByMethodName(String methodName) {
+        if (methodName.startsWith("is")) {
+            return Operation.READ;
+        } else if (methodName.startsWith("get")) {
+            return Operation.READ;
+        } else if (methodName.startsWith("set")) {
+            return Operation.WRITE;
+        }
+        return null;
+    }
 }

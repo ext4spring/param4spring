@@ -24,8 +24,8 @@ import org.ext4spring.parameter.annotation.Parameter;
 import org.ext4spring.parameter.annotation.ParameterBean;
 import org.ext4spring.parameter.annotation.ParameterQualifier;
 import org.ext4spring.parameter.converter.Converter;
-import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.Operation;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.springframework.stereotype.Component;
 
 @Component(SpringComponents.defaultParameterResolver)
@@ -51,35 +51,34 @@ public class DefaultParameterResolver implements ParameterResolver {
         // domain
         metadata.setDomain(this.resolveDomain(method));
         // parameter name and operation
-        String methodName = method.getName();
-        if (methodName.startsWith("is")) {
-            metadata.setOperation(Operation.GET);
-            metadata.setAttribute(this.resolveAttributeName(method, "is", Operation.GET));
-            metadata.setParameter(this.resolveParameterName(method, "is", Operation.GET));
-            metadata.setTypeClass(this.resolveParameterType(method));
-        } else if (method.getName().startsWith("get")) {
-            metadata.setOperation(Operation.GET);
-            metadata.setAttribute(this.resolveAttributeName(method, "get", Operation.GET));
-            metadata.setParameter(this.resolveParameterName(method, "get", Operation.GET));
-            metadata.setTypeClass(this.resolveParameterType(method));
-        } else if (method.getName().startsWith("set")) {
-            metadata.setOperation(Operation.SET);
-            metadata.setAttribute(this.resolveAttributeName(method, "set", Operation.SET));
-            metadata.setParameter(this.resolveParameterName(method, "set", Operation.SET));
-            metadata.setTypeClass(method.getParameterTypes()[0]);
-        }
-        metadata.setConverter(this.resolveConverter(method, metadata.getOperation(), metadata.getAttribute()));
-        metadata.setOptional(this.resolveOptional(method, metadata.getOperation(), metadata.getAttribute()));
-        metadata.setDefaultValue(this.resolveDefaultValue(method, metadata.getOperation(), metadata.getAttribute()));
+        metadata.setAttribute(this.getFieldNameByMethod(method));
+        metadata.setTypeClass(this.resolveParameterType(method));
+        metadata.setParameter(this.resolveParameterName(method, metadata.getAttribute()));
+        metadata.setConverter(this.resolveConverter(method, metadata.getAttribute()));
+        metadata.setOptional(this.resolveOptional(method, metadata.getAttribute()));
+        metadata.setDefaultValue(this.resolveDefaultValue(method, metadata.getAttribute()));
         this.resolveQualifier(metadata, method, invocationArgumnets);
         return metadata;
     }
 
-    protected <T extends Annotation> T findAnnotation(Class<T> annotationType, Method method, Operation operation, String paramName) {
+    private String[] validMethodPrefixes = new String[] { "is", "get", "set" };
+
+    @Override
+    public String getFieldNameByMethod(Method method) {
+        for (String methodPrefix : validMethodPrefixes) {
+            if (method.getName().startsWith(methodPrefix)) {
+                return method.getName().substring(methodPrefix.length());
+            }
+        }
+        return null;
+    }
+
+    protected <T extends Annotation> T findAnnotation(Class<T> annotationType, Method method, String paramName) {
         T annotation = method.getAnnotation(annotationType);
         if (annotation == null) {
             //not found on the specified method. for setters it looks for getter annotations
-            if (Operation.SET.equals(operation)) {
+            Operation operation = Operation.valueOfByMethodName(method.getName());
+            if (Operation.WRITE.equals(operation)) {
                 for (Method currMethod : method.getDeclaringClass().getMethods()) {
                     if (currMethod.getName().endsWith(paramName)) {
                         if (currMethod.getAnnotation(annotationType) != null) {
@@ -108,37 +107,33 @@ public class DefaultParameterResolver implements ParameterResolver {
         }
     }
 
-    private boolean resolveOptional(Method method, Operation operation, String attributeName) {
-        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, operation, attributeName);
+    private boolean resolveOptional(Method method, String attributeName) {
+        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, attributeName);
         if (parameterAnnotation != null) {
             return parameterAnnotation.optional();
         }
         return false;
     }
 
-    private Class<? extends Converter> resolveConverter(Method method, Operation operation, String attributeName) {
-        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, operation, attributeName);
+    private Class<? extends Converter> resolveConverter(Method method, String attributeName) {
+        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, attributeName);
         if (parameterAnnotation != null && parameterAnnotation.converter().length > 0) {
             return parameterAnnotation.converter()[0];
         }
         return null;
     }
 
-    private String resolveDefaultValue(Method method, Operation operation, String attributeName) {
-        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, operation, attributeName);
+    private String resolveDefaultValue(Method method, String attributeName) {
+        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, attributeName);
         if (parameterAnnotation != null && !parameterAnnotation.defaultValue().equals(Parameter.UNDEFINED)) {
             return parameterAnnotation.defaultValue();
         }
         return null;
     }
 
-    private String resolveAttributeName(Method method, String prefix, Operation operation) {
-        return method.getName().substring(prefix.length());
-    }
-
-    private String resolveParameterName(Method method, String prefix, Operation operation) {
-        String name = this.resolveAttributeName(method, prefix, operation);
-        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, operation, name);
+    private String resolveParameterName(Method method, String fieldName) {
+        String name = fieldName;
+        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, name);
         if (parameterAnnotation != null && !parameterAnnotation.name().equals(Parameter.UNDEFINED)) {
             name = parameterAnnotation.name();
         }
@@ -146,11 +141,16 @@ public class DefaultParameterResolver implements ParameterResolver {
     }
 
     private Class<?> resolveParameterType(Method method) {
-        Class<?> type = method.getReturnType();
-        if (type.isPrimitive()) {
-            return this.typeMap.get(type.getName());
+        Operation operation = Operation.valueOfByMethodName(method.getName());
+        if (Operation.WRITE.equals(operation)) {
+            return method.getParameterTypes()[0];
         } else {
-            return type;
+            Class<?> type = method.getReturnType();
+            if (type.isPrimitive()) {
+                return this.typeMap.get(type.getName());
+            } else {
+                return type;
+            }
         }
     }
 

@@ -73,35 +73,35 @@ public class DefaultParameterResolverTest extends TestBase {
         ParameterMetadata metadata;
 
         method = notAnnotatedClass.getMethod("getByte");
-        metadata = defaultParameterResolver.parse(method,null);
+        metadata = defaultParameterResolver.parse(method, null);
         Assert.assertEquals(Byte.class, metadata.getTypeClass());
 
         method = notAnnotatedClass.getMethod("getShort");
-        metadata = defaultParameterResolver.parse(method,null);
+        metadata = defaultParameterResolver.parse(method, null);
         Assert.assertEquals(Short.class, metadata.getTypeClass());
 
         method = notAnnotatedClass.getMethod("getInt");
-        metadata = defaultParameterResolver.parse(method,null);
+        metadata = defaultParameterResolver.parse(method, null);
         Assert.assertEquals(Integer.class, metadata.getTypeClass());
 
         method = notAnnotatedClass.getMethod("getLong");
-        metadata = defaultParameterResolver.parse(method,null);
+        metadata = defaultParameterResolver.parse(method, null);
         Assert.assertEquals(Long.class, metadata.getTypeClass());
 
         method = notAnnotatedClass.getMethod("isBoolean");
-        metadata = defaultParameterResolver.parse(method,null);
+        metadata = defaultParameterResolver.parse(method, null);
         Assert.assertEquals(Boolean.class, metadata.getTypeClass());
 
         method = notAnnotatedClass.getMethod("getFloat");
-        metadata = defaultParameterResolver.parse(method,null);
+        metadata = defaultParameterResolver.parse(method, null);
         Assert.assertEquals(Float.class, metadata.getTypeClass());
 
         method = notAnnotatedClass.getMethod("getDouble");
-        metadata = defaultParameterResolver.parse(method,null);
+        metadata = defaultParameterResolver.parse(method, null);
         Assert.assertEquals(Double.class, metadata.getTypeClass());
 
         method = notAnnotatedClass.getMethod("getChar");
-        metadata = defaultParameterResolver.parse(method,null);
+        metadata = defaultParameterResolver.parse(method, null);
         Assert.assertEquals(Character.class, metadata.getTypeClass());
     }
 
@@ -140,20 +140,20 @@ public class DefaultParameterResolverTest extends TestBase {
         public String getOptionalStringParam() {
             return optionalStringParam;
         }
-        
+
         @SuppressWarnings("unused")
         public String getQualifiedParam(@ParameterQualifier String qualifier) {
             return null;
         }
-        
-        @Parameter(converter=TVConverter.class, defaultValue="true", optional=true, name="differentName")
+
+        @Parameter(converter = TVConverter.class, defaultValue = "true", optional = true, name = "differentName")
         public Boolean isValue() {
             return false;
         }
-        
+
         @SuppressWarnings("unused")
         public void setValue(Boolean value) {
-            
+
         }
     }
 
@@ -164,17 +164,20 @@ public class DefaultParameterResolverTest extends TestBase {
         // getter
         Method notAnnotatedGetLongMethod = notAnnotatedClass.getMethod("getLongParam");
         DefaultParameterResolver defaultParameterResolver = new DefaultParameterResolver();
-        ParameterMetadata metadata = defaultParameterResolver.parse(notAnnotatedGetLongMethod,null);
+        ParameterMetadata metadata = defaultParameterResolver.parse(notAnnotatedGetLongMethod, null);
         Assert.assertEquals(null, metadata.getDefaultValue());
         Assert.assertEquals(Long.class, metadata.getTypeClass());
-        Assert.assertEquals(Operation.GET, metadata.getOperation());
+        Assert.assertEquals(Operation.READ, Operation.valueOfByMethodName(notAnnotatedGetLongMethod.getName()));
         Assert.assertEquals("LongParam", metadata.getParameter());
         Assert.assertEquals("org.ext4spring.parameter.DefaultParameterResolverTest.NotAnnotatedParameterBean", metadata.getDomain());
         // setter
         Method notAnnotatedSetLongMethod = notAnnotatedClass.getMethod("setLongParam", Long.class);
-        metadata = defaultParameterResolver.parse(notAnnotatedSetLongMethod,null);
-        Assert.assertEquals(Operation.SET, metadata.getOperation());
+        metadata = defaultParameterResolver.parse(notAnnotatedSetLongMethod, null);
+        Assert.assertEquals(Operation.WRITE, Operation.valueOfByMethodName(notAnnotatedSetLongMethod.getName()));
         Assert.assertEquals("LongParam", metadata.getParameter());
+        Assert.assertEquals(Long.class, metadata.getTypeClass());
+        Assert.assertEquals(null, metadata.getDefaultValue());
+        Assert.assertEquals("org.ext4spring.parameter.DefaultParameterResolverTest.NotAnnotatedParameterBean", metadata.getDomain());
     }
 
     @Test
@@ -183,40 +186,39 @@ public class DefaultParameterResolverTest extends TestBase {
         Class annotatedClass = Class.forName(AnnotatedParameterBean.class.getName());
         Method annotatedLongMethod = annotatedClass.getMethod("getLongParam");
         DefaultParameterResolver defaultParameterResolver = new DefaultParameterResolver();
-        ParameterMetadata metadata = defaultParameterResolver.parse(annotatedLongMethod,null);
+        ParameterMetadata metadata = defaultParameterResolver.parse(annotatedLongMethod, null);
         Assert.assertEquals(null, metadata.getDefaultValue());
         Assert.assertEquals(Long.class, metadata.getTypeClass());
-        Assert.assertEquals(Operation.GET, metadata.getOperation());
         Assert.assertEquals("longer", metadata.getParameter());
         // class annotations
         Assert.assertEquals("testDomain", metadata.getDomain());
 
         Method annotatedDoubleMethod = annotatedClass.getMethod("getDoubleParam");
-        metadata = defaultParameterResolver.parse(annotatedDoubleMethod,null);
+        metadata = defaultParameterResolver.parse(annotatedDoubleMethod, null);
         Assert.assertEquals("10.5", metadata.getDefaultValue());
         Assert.assertEquals(Double.class, metadata.getTypeClass());
 
         Method annotatedOptionalMethod = annotatedClass.getMethod("getOptionalStringParam");
-        metadata = defaultParameterResolver.parse(annotatedOptionalMethod,null);
+        metadata = defaultParameterResolver.parse(annotatedOptionalMethod, null);
         Assert.assertTrue(metadata.isOptional());
         Assert.assertFalse(metadata.isQualified());
         Assert.assertEquals(String.class, metadata.getTypeClass());
 
-        Method annotatedMethodWithQualifier = annotatedClass.getMethod("getQualifiedParam",String.class);
-        metadata = defaultParameterResolver.parse(annotatedMethodWithQualifier,new Object[]{"q1"});
+        Method annotatedMethodWithQualifier = annotatedClass.getMethod("getQualifiedParam", String.class);
+        metadata = defaultParameterResolver.parse(annotatedMethodWithQualifier, new Object[] { "q1" });
         Assert.assertEquals("QualifiedParam", metadata.getParameter());
         Assert.assertTrue(metadata.isQualified());
         Assert.assertEquals("q1", metadata.getQualifier());
         Assert.assertEquals("QualifiedParam.q1", metadata.getFullParameterName());
-    
-        Method setterMethodWithAnnotationsOnGetter = annotatedClass.getMethod("setValue",Boolean.class);
+
+        Method setterMethodWithAnnotationsOnGetter = annotatedClass.getMethod("setValue", Boolean.class);
         metadata = defaultParameterResolver.parse(setterMethodWithAnnotationsOnGetter, null);
         Assert.assertTrue(metadata.isOptional());
         Assert.assertEquals(Boolean.class, metadata.getTypeClass());
         Assert.assertEquals(TVConverter.class, metadata.getConverter());
         Assert.assertEquals("true", metadata.getDefaultValue());
         Assert.assertEquals("differentName", metadata.getParameter());
-    
+
     }
 
 }

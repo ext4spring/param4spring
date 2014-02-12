@@ -92,6 +92,7 @@ public class DefaultParameterBeanResolverTest extends TestBase {
         parameterBeanResolver.setParameterResolver(new DefaultParameterResolver());
         ParameterBeanMetadata beanMetadata = parameterBeanResolver.parse(notAnnotatedClass);
         Assert.assertEquals("org.ext4spring.parameter.DefaultParameterBeanResolverTest.NotAnnotatedParameterBean", beanMetadata.getDomain());
+        Assert.assertFalse(beanMetadata.isQualified());
         Assert.assertEquals(1, beanMetadata.getParameters().size());
         Assert.assertNotNull(beanMetadata.getParameter("LongParam"));
     }
@@ -105,13 +106,15 @@ public class DefaultParameterBeanResolverTest extends TestBase {
         parameterBeanResolver.setParameterResolver(new DefaultParameterResolver());
         ParameterBeanMetadata beanMetadata = parameterBeanResolver.parse(annotatedClass);
         Assert.assertEquals("testDomain", beanMetadata.getDomain());
+        Assert.assertTrue(beanMetadata.isQualified());
         Assert.assertEquals(5, beanMetadata.getParameters().size());
         Assert.assertNotNull(beanMetadata.getParameter("longer"));
         Assert.assertNotNull(beanMetadata.getParameter("OptionalStringParam"));
         Assert.assertNotNull(beanMetadata.getParameter("double"));
         Assert.assertNotNull(beanMetadata.getParameter("QualifiedParam"));
         Assert.assertNotNull(beanMetadata.getParameter("differentName"));
-
+        
+        
         //TODO: test writeable metadata if ParameterMetadata object contains it
     }
 

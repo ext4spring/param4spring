@@ -11,11 +11,20 @@ import java.util.List;
  */
 public class ParameterBeanMetadata {
 
+    private boolean qualified;
     private String domain;
     private final List<ParameterMetadata> parameters=new ArrayList<ParameterMetadata>(); 
     
     public String getDomain() {
         return domain;
+    }
+    
+    public boolean isQualified() {
+        return qualified;
+    }
+    
+    public void setQualified(boolean qualified) {
+        this.qualified = qualified;
     }
     
     public void setDomain(String domain) {

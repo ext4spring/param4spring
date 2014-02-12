@@ -45,7 +45,11 @@ public class DefaultParameterBeanResolver implements ParameterBeanResolver, Appl
             for (Method method : parameterClass.getMethods()) {
                 if ((method.getName().startsWith("get") && method.getName().substring(3).toLowerCase().equals(field.getName().toLowerCase()))
                         || (method.getName().startsWith("is") && method.getName().substring(2).toLowerCase().equals(field.getName().toLowerCase()))) {
-                    beanMetadata.addParameter(this.parameterResolver.parse(method, null));
+                    ParameterMetadata metadata = this.parameterResolver.parse(method, null);
+                    beanMetadata.addParameter(metadata);
+                    if (metadata.isQualified()) {
+                        beanMetadata.setQualified(true);
+                    }          
                 }
             }
         }
