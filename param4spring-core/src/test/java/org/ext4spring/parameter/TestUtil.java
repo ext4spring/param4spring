@@ -35,13 +35,14 @@ public class TestUtil {
         Assert.assertEquals(ApplicationSettings.SIZE, applicationSettings.getSize());
         Assert.assertEquals(ApplicationSettings.SUPPORTED, applicationSettings.isSupported());
         Assert.assertEquals(ApplicationSettings.XML_DATA, applicationSettings.getXmlConfig());
-        Assert.assertEquals(ApplicationSettings.USER_COLOR_DEFAULT, applicationSettings.getUserColor("default"));
     }
 
     public static void assertQualifiedApplicationSettingsValid(ApplicationSettings applicationSettings) {
         Assert.assertEquals(ApplicationSettings.USER_COLOR_DEFAULT, applicationSettings.getUserColor("default"));
         Assert.assertEquals(ApplicationSettings.USER_COLOR_USER1, applicationSettings.getUserColor("user1"));
         Assert.assertEquals(ApplicationSettings.USER_COLOR_USER2, applicationSettings.getUserColor("user2"));
+        Assert.assertEquals(ApplicationSettings.USER_ENABLED_USER1, applicationSettings.isUserEnabled("user1"));
+        Assert.assertEquals(ApplicationSettings.USER_ENABLED_USER2, applicationSettings.isUserEnabled("user2"));
     }
 
 }
