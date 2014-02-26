@@ -16,8 +16,6 @@
 package org.ext4spring.parameter.example;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.ext4spring.parameter.annotation.Parameter;
 import org.ext4spring.parameter.annotation.ParameterBean;
@@ -45,6 +43,8 @@ public class ApplicationSettings {
     public static final String USER_COLOR_DEFAULT="black";
     public static final String USER_COLOR_USER1="blue";
     public static final String USER_COLOR_USER2="red";
+    public static final Boolean USER_ENABLED_USER1=true;
+    public static final Boolean USER_ENABLED_USER2=false;
 
     private boolean supported;
     private String name;
@@ -52,12 +52,9 @@ public class ApplicationSettings {
     private long size = SIZE;
     private double price;
     private Date releaseDate;
-    private Map<String,String> userColor = new HashMap<String, String>();
+    private String userColor="black";
+    private Boolean userEnabled=false;
 
-    public ApplicationSettings() {
-        userColor.put("default", "black");
-    }
-    
     public boolean isSupported() {
         return supported;
     }
@@ -108,9 +105,23 @@ public class ApplicationSettings {
         this.xmlConfig = xmlConfig;
     }
     
+    /**
+     * Parameter with qualifier but map values as bean attribute
+     * @param userName
+     * @return
+     */
     @Parameter(converter=TVConverter.class)
     public String getUserColor(@ParameterQualifier String userName){
-        return this.userColor.get(userName);
+        return this.userColor;
+    }
+
+    /**
+     * Parameter with qualifier but single value as bean attribute
+     * @param userName
+     * @return
+     */
+    public Boolean isUserEnabled(@ParameterQualifier String userName) {
+        return userEnabled;
     }
     
 }

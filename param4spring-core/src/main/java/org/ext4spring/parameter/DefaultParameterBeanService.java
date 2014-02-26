@@ -58,13 +58,13 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
     @Override
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     public <T> T readParameterBean(Class<T> typeClass) throws ParameterException {
-        return this.readParameterBean(typeClass, (String[])null);
+        return this.readParameterBean(typeClass, null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T readParameterBean(Class<T> typeClass, String... parameterQualifiers) throws ParameterException {
-        LOGGER.debug("Reading parameters for class:" + typeClass);
+    public <T> T readParameterBean(Class<T> typeClass, String parameterQualifier) throws ParameterException {
+        LOGGER.debug("Reading parameters for class:" + typeClass + ", qualifier:" + parameterQualifier);
         T paramterBean;
         try {
             paramterBean = typeClass.newInstance();
@@ -77,30 +77,32 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
                         field.setAccessible(true);
                         Metadata metadata = this.parameterResolver.parse(method, null);
                         if (metadata.isQualified()) {
-                            if (parameterQualifiers != null && parameterQualifiers.length > 0) {
-                                try {
-                                    Map<String, Object> qualifiedMap;
-                                    Object mapField=field.get(paramterBean);
-                                    if (mapField==null) {
-                                        qualifiedMap=new HashMap<String, Object>();
-                                    } else {
-                                        qualifiedMap = (Map<String, Object>) field.get(paramterBean);
-                                    }                                    
-                                    for (String parameterQualifier : parameterQualifiers) {
-                                        metadata.setQualifier(parameterQualifier);
-                                        Object value = this.parameterService.read(metadata, field.get(paramterBean));
-                                        qualifiedMap.put(parameterQualifier, value);
-                                    }
-                                } catch (ClassCastException e) {
-                                    throw new ParameterException("If this field is a qualified field, the field type should be java.util.Map", e);
-                                }
-                            } else {
-                                LOGGER.warn("No qualifiers specified for a qualified parameter. The value won't be read from the repositories. "+metadata);
-                            }
-                        } else {
-                            Object value = this.parameterService.read(metadata, field.get(paramterBean));
-                            field.set(paramterBean, value);
+                            metadata.setQualifier(parameterQualifier);
                         }
+                        Object value = this.parameterService.read(metadata, field.get(paramterBean));
+                        field.set(paramterBean, value);
+//                        if (metadata.isQualified() && parameterQualifier!=null) {
+//                            metadata.setQualifier(parameterQualifier);
+//                            Object value = this.parameterService.read(metadata, field.get(paramterBean));
+//                            field.set(paramterBean, value);
+//                               try {
+//                                    Map<String, Object> qualifiedMap;
+//                                    Object mapField = field.get(paramterBean);
+//                                    if (mapField == null) {
+//                                        qualifiedMap = new HashMap<String, Object>();
+//                                    } else {
+//                                        qualifiedMap = (Map<String, Object>) field.get(paramterBean);
+//                                    }
+//                                    metadata.setQualifier(parameterQualifier);
+//                                    Object value = this.parameterService.read(metadata, field.get(paramterBean));
+//                                    qualifiedMap.put(parameterQualifier, value);
+//                                } catch (ClassCastException e) {
+//                                    throw new ParameterException("If this field is a qualified field, the field type should be java.util.Map", e);
+//                                }
+//                        } else {
+//                            Object value = this.parameterService.read(metadata, field.get(paramterBean));
+//                            field.set(paramterBean, value);
+//                        }
 
                     }
                     field.setAccessible(false);

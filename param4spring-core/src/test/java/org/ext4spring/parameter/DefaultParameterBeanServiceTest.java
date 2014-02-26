@@ -15,12 +15,8 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.sql.DataSource;
 
-import org.ext4spring.parameter.converter.json.JSONConverter;
 import org.ext4spring.parameter.example.ApplicationSettings;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,7 +28,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/testNoAOPContext.xml")
-public class NoAOPParameterBeanTest extends TestBase {
+public class DefaultParameterBeanServiceTest extends TestBase {
 
     @Autowired
     ParameterBeanService parameterBeanService;
@@ -45,10 +41,14 @@ public class NoAOPParameterBeanTest extends TestBase {
 
     @Test
     public void testPropertyValuesReadByParameterBeanService() {
-        ApplicationSettings applicationSettings = this.parameterBeanService.readParameterBean(ApplicationSettings.class, "user1", "user2");
+        ApplicationSettings applicationSettings = this.parameterBeanService.readParameterBean(ApplicationSettings.class);
         TestUtil.assertApplicationSettingsValid(applicationSettings);
-        Assert.assertEquals("black", applicationSettings.getUserColor("default"));
+        Assert.assertEquals("black", applicationSettings.getUserColor(null));
+        applicationSettings = this.parameterBeanService.readParameterBean(ApplicationSettings.class, "user1");
+        TestUtil.assertApplicationSettingsValid(applicationSettings);
         Assert.assertEquals("blue", applicationSettings.getUserColor("user1"));
+        applicationSettings = this.parameterBeanService.readParameterBean(ApplicationSettings.class, "user2");
+        TestUtil.assertApplicationSettingsValid(applicationSettings);
         Assert.assertEquals("red", applicationSettings.getUserColor("user2"));
     }
 

@@ -5,3 +5,5 @@ INSERT INTO parameters(domain,parameter,data) values ('applicationSettings','Xml
 INSERT INTO parameters(domain,parameter,data) values ('applicationSettings','UserColor','black');
 INSERT INTO parameters(domain,parameter,data) values ('applicationSettings','UserColor.user1','blue');
 INSERT INTO parameters(domain,parameter,data) values ('applicationSettings','UserColor.user2','red');
+INSERT INTO parameters(domain,parameter,data) values ('applicationSettings','UserEnabled.user1','true');
+INSERT INTO parameters(domain,parameter,data) values ('applicationSettings','UserEnabled.user2','false');
