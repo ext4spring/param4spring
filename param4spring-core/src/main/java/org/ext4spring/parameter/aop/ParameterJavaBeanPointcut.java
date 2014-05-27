@@ -17,22 +17,31 @@ package org.ext4spring.parameter.aop;
 
 import java.lang.reflect.Method;
 
+import org.ext4spring.parameter.ParameterBeanRegistry;
 import org.ext4spring.parameter.SpringComponents;
 import org.ext4spring.parameter.annotation.ParameterBean;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component(SpringComponents.javaBeanPointcut)
 public class ParameterJavaBeanPointcut extends StaticMethodMatcherPointcut {
 
-	@Override
-	public boolean matches(Method method, Class<?> clazz) {
-		if (clazz.isAnnotationPresent(ParameterBean.class)
-				&& (method.getName().startsWith("get")
-						|| method.getName().startsWith("is") || method
-						.getName().startsWith("set"))) {
-			return true;
-		}
-		return false;
-	}
+    private final ParameterBeanRegistry parameterBeanRegistry;
+
+    @Autowired
+    public ParameterJavaBeanPointcut(ParameterBeanRegistry parameterBeanRegistry) {
+        super();
+        this.parameterBeanRegistry = parameterBeanRegistry;
+    }
+
+    @Override
+    public boolean matches(Method method, Class<?> clazz) {
+        if (clazz.isAnnotationPresent(ParameterBean.class) && (method.getName().startsWith("get") || method.getName().startsWith("is") || method.getName().startsWith("set"))) {
+            this.parameterBeanRegistry.register(clazz);
+            return true;
+        }
+        return false;
+    }
+
 }

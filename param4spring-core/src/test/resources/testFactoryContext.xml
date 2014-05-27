@@ -27,6 +27,7 @@
 	<!-- Init Spring Param -->
 	<context:annotation-config/>
 	<context:component-scan base-package="org.ext4spring.parameter" />
+	<bean id="parameterBeanService" class="org.ext4spring.parameter.DefaultParameterBeanService"/>
 
 	<!-- 1. Create repositories for each parameter source -->
 	<bean id="parameterRepository" class="org.ext4spring.parameter.dao.PropertyParameterRepository">

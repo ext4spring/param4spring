@@ -40,6 +40,7 @@ public class DefaultParameterBeanResolver implements ParameterBeanResolver, Appl
     @Override
     public ParameterBeanMetadata parse(Class<?> parameterClass) {
         ParameterBeanMetadata beanMetadata = new ParameterBeanMetadata();
+        beanMetadata.setParameterBeanClass(parameterClass);
         beanMetadata.setDomain(this.resolveDomain(parameterClass));
         for (Field field : this.getSupportedFields(parameterClass)) {
             for (Method method : parameterClass.getMethods()) {

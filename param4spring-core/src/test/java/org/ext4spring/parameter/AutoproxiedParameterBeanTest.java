@@ -15,7 +15,11 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
+import java.util.List;
+
 import org.ext4spring.parameter.example.ApplicationSettings;
+import org.ext4spring.parameter.model.ParameterBeanMetadata;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +30,22 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration("/testAutoproxyContext.xml")
 public class AutoproxiedParameterBeanTest extends TestBase {
 
-	@Autowired
-	ApplicationSettings applicationSettings;
+    @Autowired
+    ApplicationSettings applicationSettings;
 
-	@Test
-	public void testPropertyValuesReadByParameterAspect()
-			throws InterruptedException {
-		TestUtil.assertApplicationSettingsValid(this.applicationSettings);
-		TestUtil.assertQualifiedApplicationSettingsValid(applicationSettings);
-	}
+    @Autowired
+    ParameterBeanService parameterBeanService;
 
+    @Test
+    public void testPropertyValuesReadByParameterAspect() throws InterruptedException {
+        TestUtil.assertApplicationSettingsValid(this.applicationSettings);
+        TestUtil.assertQualifiedApplicationSettingsValid(applicationSettings);
+    }
+
+    @Test
+    public void testParameterBeanAutomaticallyRegistered() {
+        List<ParameterBeanMetadata> parameterBeanMetadatas = this.parameterBeanService.listParameterBeans();
+        Assert.assertEquals(1, parameterBeanMetadatas.size());
+        Assert.assertEquals(ApplicationSettings.class, parameterBeanMetadatas.get(0).getParameterBeanClass());
+    }
 }

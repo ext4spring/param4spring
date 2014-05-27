@@ -12,6 +12,7 @@ import java.util.List;
 public class ParameterBeanMetadata {
 
     private boolean qualified;
+    private Class<?> parameterBeanClass;
     private String domain;
     private final List<ParameterMetadata> parameters=new ArrayList<ParameterMetadata>(); 
     
@@ -48,4 +49,11 @@ public class ParameterBeanMetadata {
         this.parameters.add(parameterMetadata);
     }
 
+    public Class<?> getParameterBeanClass() {
+        return parameterBeanClass;
+    }
+    
+    public void setParameterBeanClass(Class<?> parameterBeanClass) {
+        this.parameterBeanClass = parameterBeanClass;
+    }
 }

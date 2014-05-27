@@ -15,7 +15,10 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
+import java.util.List;
+
 import org.ext4spring.parameter.exception.ParameterException;
+import org.ext4spring.parameter.model.ParameterBeanMetadata;
 
 /**
  * Service to handle parameter beans without AOP
@@ -33,18 +36,38 @@ public interface ParameterBeanService {
 
     /**
      * Reads the parameter bean, that has qualifier values from the configured repositories and populates the values
-     * into the bean fields. The qualified parameter have to be java.util.Map. The Map keys will be the parameterQualifiers values.
+     * into the bean fields. The qualified parameter have to be java.util.Map. The Map keys will be the
+     * parameterQualifiers values.
      * 
      * @param typeClass
-     * @param parameterQualifiers qualifier that will be read from the repositories for @ParameterQualifier annotated methods.
+     * @param parameterQualifiers qualifier that will be read from the repositories for @ParameterQualifier annotated
+     *            methods.
      * @throws ParameterException
      */
     <T> T readParameterBean(Class<T> typeClass, String parameterQualifier) throws ParameterException;
 
     /**
      * Writes the parameter bean values into the underlying repositories.
+     * 
      * @param parameterBean
      * @throws ParameterException
      */
     <T> void writeParameterBean(T parameterBean) throws ParameterException;
+
+    /**
+     * Registers a class as parameter bean. read/writeParameterBean indirectly also registers bean and all AOP proxied parameter
+     * beans are also registered automatically.
+     * 
+     * @param parameterBeanClass
+     * @throws ParameterException
+     */
+    public void register(Class<?> parameterBeanClass) throws ParameterException;
+
+    /**
+     * List registered parameter beans If you don't use AOP parameter beans, you should register first manually.
+     * 
+     * @return
+     * @throws ParameterException
+     */
+    List<ParameterBeanMetadata> listParameterBeans() throws ParameterException;
 }

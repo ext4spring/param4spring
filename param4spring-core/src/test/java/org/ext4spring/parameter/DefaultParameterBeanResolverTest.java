@@ -92,6 +92,8 @@ public class DefaultParameterBeanResolverTest extends TestBase {
         parameterBeanResolver.setParameterResolver(new DefaultParameterResolver());
         ParameterBeanMetadata beanMetadata = parameterBeanResolver.parse(notAnnotatedClass);
         Assert.assertEquals("org.ext4spring.parameter.DefaultParameterBeanResolverTest.NotAnnotatedParameterBean", beanMetadata.getDomain());
+        Assert.assertEquals(NotAnnotatedParameterBean.class, beanMetadata.getParameterBeanClass());
+
         Assert.assertFalse(beanMetadata.isQualified());
         Assert.assertEquals(1, beanMetadata.getParameters().size());
         Assert.assertNotNull(beanMetadata.getParameter("LongParam"));

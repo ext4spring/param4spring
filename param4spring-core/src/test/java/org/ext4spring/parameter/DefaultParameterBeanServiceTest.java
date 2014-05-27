@@ -15,9 +15,12 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.ext4spring.parameter.example.ApplicationSettings;
+import org.ext4spring.parameter.model.ParameterBeanMetadata;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,5 +61,21 @@ public class DefaultParameterBeanServiceTest extends TestBase {
         applicationSettings.setName("Changed name");
         this.parameterBeanService.writeParameterBean(applicationSettings);
         Assert.assertEquals(1, jdbcTemplate.queryForInt("Select count(*) from parameters where data='\"Changed name\"'"));
+    }
+    
+    @Test
+    public void testListManuallyRegisteredParameterBeanMetadatas() {
+        this.parameterBeanService.register(ApplicationSettings.class);
+        List<ParameterBeanMetadata> parameterBeanMetadatas = this.parameterBeanService.listParameterBeans();
+        Assert.assertEquals(1, parameterBeanMetadatas.size());
+        Assert.assertEquals(ApplicationSettings.class, parameterBeanMetadatas.get(0).getParameterBeanClass());
+    }
+
+    @Test
+    public void testListIndirectlyRegisteredParameterBeanMetadatas() {
+        this.parameterBeanService.readParameterBean(ApplicationSettings.class);
+        List<ParameterBeanMetadata> parameterBeanMetadatas = this.parameterBeanService.listParameterBeans();
+        Assert.assertEquals(1, parameterBeanMetadatas.size());
+        Assert.assertEquals(ApplicationSettings.class, parameterBeanMetadatas.get(0).getParameterBeanClass());
     }
 }

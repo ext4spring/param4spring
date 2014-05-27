@@ -27,6 +27,7 @@ public class ParameterMetadata {
     private String domain;
     private String attribute;
     private String parameter;
+    private String fullParameterName;
     private String defaultValue;
     private Class<? extends Converter> converter;
     private boolean optional;
@@ -35,13 +36,17 @@ public class ParameterMetadata {
 
     /**
      * parameter name with its qualifier (if has one)
+     * 
      * @return
      */
     public String getFullParameterName() {
+        //local variable is necassary for json serialization, so thats why we set the value instead of simply return
         if (qualifier != null) {
-            return parameter + "." + qualifier;
+            this.fullParameterName = parameter + "." + qualifier;
+        } else {
+            this.fullParameterName = parameter;
         }
-        return parameter;
+        return this.fullParameterName;
     }
 
     public String getDefaultValue() {
@@ -60,7 +65,7 @@ public class ParameterMetadata {
         this.domain = domain;
     }
 
-    //The attribute name of the parameter (field name of Java Bean with capitalized letter)
+    //The attribute name of the parameter (field name of the object)
     public String getAttribute() {
         return attribute;
     }
@@ -69,7 +74,7 @@ public class ParameterMetadata {
         this.attribute = attribute;
     }
 
-    //The parameter name of the parameter equals with the attribute name if a @Parameter doesn't override it 
+    //The parameter name of the parameter equals with the capitalized attribute name if a @Parameter doesn't override it 
     public String getParameter() {
         return parameter;
     }
@@ -110,12 +115,10 @@ public class ParameterMetadata {
         this.qualifier = qualifier;
     }
 
-
-
     @Override
     public String toString() {
-        return "Metadata [typeClass=" + typeClass + ", domain=" + domain + ", attribute=" + attribute + ", parameter=" + parameter + ", defaultValue=" + defaultValue
-                + ", converter=" + converter + ", optional=" + optional + ", qualified=" + qualified + ", qualifier=" + qualifier + "]";
+        return "Metadata [typeClass=" + typeClass + ", domain=" + domain + ", attribute=" + attribute + ", parameter=" + parameter + ", defaultValue=" + defaultValue + ", converter=" + converter
+                + ", optional=" + optional + ", qualified=" + qualified + ", qualifier=" + qualifier + "]";
     }
 
     @Override

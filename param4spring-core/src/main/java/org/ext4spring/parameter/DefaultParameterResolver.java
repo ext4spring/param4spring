@@ -27,6 +27,7 @@ import org.ext4spring.parameter.converter.Converter;
 import org.ext4spring.parameter.model.Operation;
 import org.ext4spring.parameter.model.ParameterMetadata;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component(SpringComponents.defaultParameterResolver)
 public class DefaultParameterResolver implements ParameterResolver {
@@ -67,20 +68,22 @@ public class DefaultParameterResolver implements ParameterResolver {
     public String getFieldNameByMethod(Method method) {
         for (String methodPrefix : validMethodPrefixes) {
             if (method.getName().startsWith(methodPrefix)) {
-                return method.getName().substring(methodPrefix.length());
+                String nameWithoutPrefix = method.getName().substring(methodPrefix.length());
+                return StringUtils.uncapitalize(nameWithoutPrefix);
             }
         }
         return null;
     }
 
-    protected <T extends Annotation> T findAnnotation(Class<T> annotationType, Method method, String paramName) {
+    protected <T extends Annotation> T findAnnotation(Class<T> annotationType, Method method, String attributeName) {
         T annotation = method.getAnnotation(annotationType);
         if (annotation == null) {
             //not found on the specified method. for setters it looks for getter annotations
             Operation operation = Operation.valueOfByMethodName(method.getName());
+            String methodWithoutPrefix=StringUtils.capitalize(attributeName);
             if (Operation.WRITE.equals(operation)) {
                 for (Method currMethod : method.getDeclaringClass().getMethods()) {
-                    if (currMethod.getName().endsWith(paramName)) {
+                    if (currMethod.getName().endsWith(methodWithoutPrefix)) {
                         if (currMethod.getAnnotation(annotationType) != null) {
                             return currMethod.getAnnotation(annotationType);
                         }
@@ -131,11 +134,13 @@ public class DefaultParameterResolver implements ParameterResolver {
         return null;
     }
 
-    private String resolveParameterName(Method method, String fieldName) {
-        String name = fieldName;
-        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, name);
+    private String resolveParameterName(Method method, String attributeName) {
+        String name;
+        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, attributeName);
         if (parameterAnnotation != null && !parameterAnnotation.name().equals(Parameter.UNDEFINED)) {
             name = parameterAnnotation.name();
+        } else {
+            name = StringUtils.capitalize(attributeName);
         }
         return name;
     }

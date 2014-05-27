@@ -21,6 +21,7 @@ import org.ext4spring.parameter.aop.ParameterAdvice;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -29,55 +30,59 @@ import org.springframework.context.ApplicationContextAware;
  * Creates an AOP proxied version of the parameter bean
  * 
  * @author Peter Borbas
- * 
  */
-public class ParameterBeanFactory implements FactoryBean<Object>,
-		ApplicationContextAware {
+public class ParameterBeanFactory implements FactoryBean<Object>, ApplicationContextAware {
 
-	private ApplicationContext applicationContext;
-	private Object parameterBean;
-	private ParameterAdvice parameterAdvice;
+    private ApplicationContext applicationContext;
+    private Object parameterBean;
+    private ParameterAdvice parameterAdvice;
 
-	@Override
-	public Object getObject() throws Exception {
-		ProxyFactory proxyFactory = new ProxyFactory(parameterBean);
-		proxyFactory.addAdvice(parameterAdvice);
-		proxyFactory.setProxyTargetClass(!parameterBean.getClass()
-				.isInterface());
-		return proxyFactory.getProxy();
-	}
+    private final ParameterBeanRegistry parameterBeanRegistry;
 
-	@Override
-	public Class<?> getObjectType() {
-		return parameterBean.getClass();
-	}
+    @Autowired
+    public ParameterBeanFactory(ParameterBeanRegistry parameterBeanRegistry) {
+        super();
+        this.parameterBeanRegistry = parameterBeanRegistry;
+    }
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
+    @Override
+    public Object getObject() throws Exception {
+        ProxyFactory proxyFactory = new ProxyFactory(parameterBean);
+        proxyFactory.addAdvice(parameterAdvice);
+        proxyFactory.setProxyTargetClass(!parameterBean.getClass().isInterface());
+        return proxyFactory.getProxy();
+    }
 
-	@Required
-	public void setParameterBean(Object parameterBean) {
-		this.parameterBean = parameterBean;
-	}
+    @Override
+    public Class<?> getObjectType() {
+        return parameterBean.getClass();
+    }
 
-	public void setParameterAdvice(ParameterAdvice parameterAdvice) {
-		this.parameterAdvice = parameterAdvice;
-	}
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.applicationContext = applicationContext;
-	}
+    @Required
+    public void setParameterBean(Object parameterBean) {
+        this.parameterBeanRegistry.register(parameterBean.getClass());
+        this.parameterBean = parameterBean;
+    }
 
-	@PostConstruct
-	public void init() {
-		if (this.parameterAdvice == null) {
-			// try to use default
-			this.parameterAdvice = (ParameterAdvice) this.applicationContext
-					.getBean(SpringComponents.defaultParameterAdvice);
-		}
-	}
+    public void setParameterAdvice(ParameterAdvice parameterAdvice) {
+        this.parameterAdvice = parameterAdvice;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    @PostConstruct
+    public void init() {
+        if (this.parameterAdvice == null) {
+            // try to use default
+            this.parameterAdvice = (ParameterAdvice) this.applicationContext.getBean(SpringComponents.defaultParameterAdvice);
+        }
+    }
 }

@@ -28,4 +28,5 @@ public interface SpringComponents {
 	public static final String defaultConverterFactory = "springParamDefaultConverterFactory";
 	public static final String simpleConverterFactory = "springParamSimpleConverterFactory";
 	public static final String javaBeanPointcut = "springParamJavaBeanPointcut";
+        public static final String defaultParameterBeanRegistry = "springParamDefaultParameterBeanRegistry";
 }
