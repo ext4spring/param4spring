@@ -15,7 +15,9 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -107,6 +109,16 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
             LOGGER.error("Not writeable repository found for:" + metadata);
             throw new RepositoryNotFoundException("No writeable repository found for:" + metadata);
 
+        }
+    }
+    
+    @Override
+    public List<String> getParameterQualifiers(ParameterMetadata metadata) {
+        ParameterRepository repository=this.getReadableRepository(metadata);
+        if (repository!=null) {
+            return repository.getParameterQualifiers(metadata);
+        } else {
+            return new ArrayList<String>(0);
         }
     }
 

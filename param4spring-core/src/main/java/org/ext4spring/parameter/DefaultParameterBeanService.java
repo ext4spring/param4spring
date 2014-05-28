@@ -16,9 +16,9 @@
 package org.ext4spring.parameter;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -93,53 +93,13 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
                 field.setAccessible(true);
                 if (parameterMetadata.isQualified()) {
                     parameterMetadata.setQualifier(parameterQualifier);
-                 }
+                }
                 Object value = this.parameterService.read(parameterMetadata, field.get(paramterBean));
                 field.set(paramterBean, value);
                 field.setAccessible(false);
 
             }
 
-//            for (Field field : this.getSupportedFields(typeClass)) {
-//                // find getter for field;
-//                for (Method method : paramterBean.getClass().getMethods()) {
-//                    if ((method.getName().startsWith("get") && method.getName().substring(3).toLowerCase().equals(field.getName().toLowerCase()))
-//                            || (method.getName().startsWith("is") && method.getName().substring(2).toLowerCase().equals(field.getName().toLowerCase()))) {
-//                        // set value from repository
-//                        field.setAccessible(true);
-//                        ParameterMetadata metadata = this.parameterResolver.parse(method, null);
-//                        if (metadata.isQualified()) {
-//                            metadata.setQualifier(parameterQualifier);
-//                        }
-//                        Object value = this.parameterService.read(metadata, field.get(paramterBean));
-//                        field.set(paramterBean, value);
-////                        if (metadata.isQualified() && parameterQualifier!=null) {
-////                            metadata.setQualifier(parameterQualifier);
-////                            Object value = this.parameterService.read(metadata, field.get(paramterBean));
-////                            field.set(paramterBean, value);
-////                               try {
-////                                    Map<String, Object> qualifiedMap;
-////                                    Object mapField = field.get(paramterBean);
-////                                    if (mapField == null) {
-////                                        qualifiedMap = new HashMap<String, Object>();
-////                                    } else {
-////                                        qualifiedMap = (Map<String, Object>) field.get(paramterBean);
-////                                    }
-////                                    metadata.setQualifier(parameterQualifier);
-////                                    Object value = this.parameterService.read(metadata, field.get(paramterBean));
-////                                    qualifiedMap.put(parameterQualifier, value);
-////                                } catch (ClassCastException e) {
-////                                    throw new ParameterException("If this field is a qualified field, the field type should be java.util.Map", e);
-////                                }
-////                        } else {
-////                            Object value = this.parameterService.read(metadata, field.get(paramterBean));
-////                            field.set(paramterBean, value);
-////                        }
-//
-//                    }
-//                    field.setAccessible(false);
-//                }
-//            }
             this.register(typeClass);
             return paramterBean;
         } catch (Exception e) {
@@ -151,22 +111,25 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
     @Override
     @Transactional(readOnly = false, propagation = Propagation.SUPPORTS)
     public <T> void writeParameterBean(T parameterBean) {
-        LOGGER.debug("Writing parameters for bean:" + parameterBean);
+        this.writeParameterBean(parameterBean, null);
+    }
+
+    @Override
+    public <T> void writeParameterBean(T parameterBean, String parameterQualifier) throws ParameterException {
+        LOGGER.debug("Writing parameters for bean:" + parameterBean + " with qualifier:" + parameterQualifier);
         try {
-            for (Field field : this.getSupportedFields(parameterBean.getClass())) {
-                // find getter for field;
-                for (Method method : parameterBean.getClass().getMethods()) {
-                    if (method.getName().startsWith("set") && method.getName().toLowerCase().endsWith(field.getName().toLowerCase())) {
-                        // save value to repository
-                        field.setAccessible(true);
-                        ParameterMetadata metadata = this.parameterResolver.parse(method, null);
-                        if (metadata.isQualified()) {
-                            //TODO: If the parameter is qualified get the Map and save all values to the repository
-                            throw new UnsupportedOperationException("Saving of parameter beans with @ParameterQualifier annotation is not yet supported");
-                        }
-                        this.parameterService.write(metadata, field.get(parameterBean));
-                        field.setAccessible(false);
+            Class<?> typeClass = parameterBean.getClass();
+            ParameterBeanMetadata beanMetadata = this.parameterBeanResolver.parse(typeClass);
+            for (ParameterMetadata parameterMetadata : beanMetadata.getParameters()) {
+                if (!parameterMetadata.isReadOnly()) { 
+                    Field field = this.findField(typeClass, parameterMetadata.getAttribute());
+                    field.setAccessible(true);
+                    if (parameterMetadata.isQualified()) {
+                        parameterMetadata.setQualifier(parameterQualifier);
                     }
+                    this.parameterService.write(parameterMetadata, field.get(parameterBean));
+                    field.setAccessible(false);
+
                 }
             }
             this.register(parameterBean.getClass());
@@ -174,6 +137,7 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
             LOGGER.error("Error happened while writing parameter bean:" + parameterBean + "." + e, e);
             throw new ParameterException("Error happened while writing parameter bean:" + parameterBean + "." + e, e);
         }
+
     }
 
     @Override
@@ -189,6 +153,16 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
             parameterBeanMetadatas.add(this.parameterBeanResolver.parse(parameterBeanClass));
         }
         return parameterBeanMetadatas;
+    }
+
+    @Override
+    public Set<String> getQualifiers(Class<?> parameterBeanClass) throws ParameterException {
+        ParameterBeanMetadata beanMetadata = this.parameterBeanResolver.parse(parameterBeanClass);
+        Set<String> qualifiers = new HashSet<String>();
+        for (ParameterMetadata parameterMetadata : beanMetadata.getParameters()) {
+            qualifiers.addAll(this.parameterService.getParameterQualifiers(parameterMetadata));
+        }
+        return qualifiers;
     }
 
     public void setParameterResolver(ParameterResolver parameterResolver) {

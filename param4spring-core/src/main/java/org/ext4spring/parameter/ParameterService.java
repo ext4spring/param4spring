@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
+import java.util.List;
+
 import org.ext4spring.parameter.exception.ParameterException;
 import org.ext4spring.parameter.model.ParameterMetadata;
 
@@ -29,4 +31,14 @@ public interface ParameterService {
     public Object read(ParameterMetadata metadata, Object methodReturnValue) throws ParameterException;
 
     public void write(ParameterMetadata metadata, Object value) throws ParameterException;
+
+    /**
+     * Lists all existing qualifiers in the repository for the given parameter
+     * @param metadata
+     * @return
+     */
+    List<String> getParameterQualifiers(ParameterMetadata metadata);
+    
+    
+    
 }

@@ -15,6 +15,9 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ext4spring.parameter.dao.ParameterRepository;
 import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.RepositoryMode;
@@ -50,6 +53,11 @@ public class MockParameterRepository implements ParameterRepository {
 	@Override
 	public RepositoryMode getMode(String domain) {
 		return RepositoryMode.WRITE_ALL;
+	}
+	
+	@Override
+	public List<String> getParameterQualifiers(ParameterMetadata metadata) {
+	    return new ArrayList<String>();
 	}
 
 }

@@ -16,6 +16,7 @@
 package org.ext4spring.parameter;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -28,9 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/testNoAOPContext.xml")
+@Transactional
 public class DefaultParameterBeanServiceTest extends TestBase {
 
     @Autowired
@@ -77,5 +80,38 @@ public class DefaultParameterBeanServiceTest extends TestBase {
         List<ParameterBeanMetadata> parameterBeanMetadatas = this.parameterBeanService.listParameterBeans();
         Assert.assertEquals(1, parameterBeanMetadatas.size());
         Assert.assertEquals(ApplicationSettings.class, parameterBeanMetadatas.get(0).getParameterBeanClass());
+    }
+    
+    @Test
+    public void testReadQualifiersOfParameter() {
+        Set<String> qualifiers=this.parameterBeanService.getQualifiers(ApplicationSettings.class);
+        Assert.assertEquals(2, qualifiers.size());
+        Assert.assertTrue(qualifiers.contains("user1"));
+        Assert.assertTrue(qualifiers.contains("user2"));
+    }
+    
+    @Test
+    public void testReadBeanWithoutQualifier() {
+        ApplicationSettings applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class);
+        TestUtil.assertApplicationSettingsValid(applicationSettings);
+
+    }
+    
+    @Test
+    public void testReadBeanWithQualifier() {
+        ApplicationSettings applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class, "user1");
+        TestUtil.assertApplicationSettingsValid(applicationSettings);
+        Assert.assertEquals("blue", applicationSettings.getUserColor("user1"));
+    }
+    
+    @Test
+    public void saveQualifiedBeanWithExistingQualifier() {
+        ApplicationSettings applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class, "user1");
+        applicationSettings.setUserColor("purple");
+        this.parameterBeanService.writeParameterBean(applicationSettings, "user1");
+        applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class, "user1");
+        Assert.assertEquals("purple", applicationSettings.getUserColor("user1"));
+        applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class);
+        Assert.assertEquals("black", applicationSettings.getUserColor(null));
     }
 }

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package org.ext4spring.parameter.dao;
 
+import java.util.List;
+
 import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.RepositoryMode;
 
@@ -58,5 +60,12 @@ public interface ParameterRepository {
 	 *         it dont know about that domain, else the R/W mode
 	 */
 	RepositoryMode getMode(String domain);
+	
+	/**
+	 * Lists all existing qualifiers in the repository for the given parameter
+	 * @param metadata
+	 * @return
+	 */
+	List<String> getParameterQualifiers(ParameterMetadata metadata);
 
 }

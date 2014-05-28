@@ -21,8 +21,8 @@ import org.ext4spring.parameter.annotation.Parameter;
 import org.ext4spring.parameter.annotation.ParameterBean;
 import org.ext4spring.parameter.annotation.ParameterQualifier;
 import org.ext4spring.parameter.converter.tv.TVConverter;
-import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.Operation;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -170,6 +170,7 @@ public class DefaultParameterResolverTest extends TestBase {
         Assert.assertEquals(Operation.READ, Operation.valueOfByMethodName(notAnnotatedGetLongMethod.getName()));
         Assert.assertEquals("LongParam", metadata.getParameter());
         Assert.assertEquals("org.ext4spring.parameter.DefaultParameterResolverTest.NotAnnotatedParameterBean", metadata.getDomain());
+        Assert.assertFalse(metadata.isReadOnly());
         // setter
         Method notAnnotatedSetLongMethod = notAnnotatedClass.getMethod("setLongParam", Long.class);
         metadata = defaultParameterResolver.parse(notAnnotatedSetLongMethod, null);
@@ -178,6 +179,7 @@ public class DefaultParameterResolverTest extends TestBase {
         Assert.assertEquals(Long.class, metadata.getTypeClass());
         Assert.assertEquals(null, metadata.getDefaultValue());
         Assert.assertEquals("org.ext4spring.parameter.DefaultParameterResolverTest.NotAnnotatedParameterBean", metadata.getDomain());
+        Assert.assertFalse(metadata.isReadOnly());
     }
 
     @Test
@@ -203,6 +205,7 @@ public class DefaultParameterResolverTest extends TestBase {
         Assert.assertTrue(metadata.isOptional());
         Assert.assertFalse(metadata.isQualified());
         Assert.assertEquals(String.class, metadata.getTypeClass());
+        Assert.assertTrue(metadata.isReadOnly());
 
         Method annotatedMethodWithQualifier = annotatedClass.getMethod("getQualifiedParam", String.class);
         metadata = defaultParameterResolver.parse(annotatedMethodWithQualifier, new Object[] { "q1" });
@@ -210,6 +213,7 @@ public class DefaultParameterResolverTest extends TestBase {
         Assert.assertTrue(metadata.isQualified());
         Assert.assertEquals("q1", metadata.getQualifier());
         Assert.assertEquals("QualifiedParam.q1", metadata.getFullParameterName());
+        Assert.assertTrue(metadata.isReadOnly());
 
         Method setterMethodWithAnnotationsOnGetter = annotatedClass.getMethod("setValue", Boolean.class);
         metadata = defaultParameterResolver.parse(setterMethodWithAnnotationsOnGetter, null);
@@ -217,7 +221,8 @@ public class DefaultParameterResolverTest extends TestBase {
         Assert.assertEquals(Boolean.class, metadata.getTypeClass());
         Assert.assertEquals(TVConverter.class, metadata.getConverter());
         Assert.assertEquals("true", metadata.getDefaultValue());
-        Assert.assertEquals("differentName", metadata.getParameter());
+        Assert.assertEquals("differentName", metadata.getParameter());        
+        Assert.assertFalse(metadata.isReadOnly());
 
     }
 

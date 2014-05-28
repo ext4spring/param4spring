@@ -16,11 +16,16 @@
 package org.ext4spring.parameter;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
 import org.ext4spring.parameter.converter.json.JSONConverter;
+import org.ext4spring.parameter.dao.JdbcParameterRepository;
 import org.ext4spring.parameter.example.ApplicationSettings;
+import org.ext4spring.parameter.model.ParameterBeanMetadata;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +41,9 @@ public class JdbcParameterRepositoryTest extends TestBase {
     @Autowired
     ApplicationSettings applicationSettings;
 
+    @Autowired
+    JdbcParameterRepository jdbcParameterRepository;
+    
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -62,5 +70,19 @@ public class JdbcParameterRepositoryTest extends TestBase {
         Assert.assertEquals("Changed name", this.applicationSettings.getName());
         Assert.assertEquals(new Date(2000), this.applicationSettings.getReleaseDate());
         this.applicationSettings.setName("Application name");
+    }
+    
+    @Test
+    public void testReadQualifiersOfParameter() {
+        DefaultParameterBeanResolver resolver=new DefaultParameterBeanResolver();
+        resolver.setParameterResolver(new DefaultParameterResolver());
+        ParameterBeanMetadata beanMetadat=resolver.parse(ApplicationSettings.class);
+        Set<String> qualifiers=new HashSet<String>();
+        for (ParameterMetadata parameterMetadata:beanMetadat.getParameters()) {
+            qualifiers.addAll(this.jdbcParameterRepository.getParameterQualifiers(parameterMetadata));
+        }
+        Assert.assertEquals(2, qualifiers.size());
+        Assert.assertTrue(qualifiers.contains("user1"));
+        Assert.assertTrue(qualifiers.contains("user2"));
     }
 }

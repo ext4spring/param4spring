@@ -16,6 +16,8 @@
 package org.ext4spring.parameter.dao;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -32,53 +34,66 @@ import org.springframework.core.io.Resource;
  * Uses a property file as repository
  * 
  * @author Peter Borbas
- * 
  */
+//TODO: write tests
 public class PropertyParameterRepository extends AbstractParameterRepository {
 
-	private Properties properties;
-	private Resource propertyResource;
-        private static final Log LOGGER = LogFactory.getLog(PropertyParameterRepository.class);
+    private Properties properties;
+    private Resource propertyResource;
+    private static final Log LOGGER = LogFactory.getLog(PropertyParameterRepository.class);
 
-	protected String createKey(ParameterMetadata metadata) {
-		return metadata.getDomain() + "." + metadata.getFullParameterName();
-	}
+    protected String createKey(ParameterMetadata metadata) {
+        return metadata.getDomain() + "." + metadata.getFullParameterName();
+    }
 
-	@Override
-	public String getValue(ParameterMetadata metadata) {
-		return this.properties.getProperty(this.createKey(metadata));
-	}
+    @Override
+    public String getValue(ParameterMetadata metadata) {
+        return this.properties.getProperty(this.createKey(metadata));
+    }
 
-	@Override
-	public boolean parameterExists(ParameterMetadata metadata) {
-		return this.properties.containsKey(this.createKey(metadata));
-	};
+    @Override
+    public boolean parameterExists(ParameterMetadata metadata) {
+        return this.properties.containsKey(this.createKey(metadata));
+    };
 
-	@Override
-	public void setValue(ParameterMetadata metadata, String value) {
-		throw new ParameterException("Write not allowed on PropertyRepository. Parameter:"+metadata);
-	}
+    @Override
+    public void setValue(ParameterMetadata metadata, String value) {
+        //TODO: FEATURE: enable write properties (if we write the whole file, it should be configurable to enable this feature)
+        throw new ParameterException("Write not allowed on PropertyRepository. Parameter:" + metadata);
+    }
 
-	@Required
-	public void setPropertyResource(Resource propertyResource) {
-		this.propertyResource = propertyResource;
-	}
+    @Required
+    public void setPropertyResource(Resource propertyResource) {
+        this.propertyResource = propertyResource;
+    }
 
-	@PostConstruct
-	public void init() throws IOException {
-		this.properties = new Properties();
-		this.properties.load(this.propertyResource.getInputStream());
-	}
+    @PostConstruct
+    public void init() throws IOException {
+        this.properties = new Properties();
+        this.properties.load(this.propertyResource.getInputStream());
+    }
 
-	@Override
-	public RepositoryMode getMode(String domain) {
-	    RepositoryMode currentMode=super.getMode(domain);
-		if (!RepositoryMode.NONE.equals(currentMode)) {
-			if (!RepositoryMode.READ_ONLY.equals(currentMode)) {
-			    LOGGER.warn("Parameter repository only supports READ_ONLY mode, but configured as:"+currentMode);
-			}
-			return RepositoryMode.READ_ONLY;
-		}
-		return RepositoryMode.NONE;
-	}
+    @Override
+    public RepositoryMode getMode(String domain) {
+        RepositoryMode currentMode = super.getMode(domain);
+        if (!RepositoryMode.NONE.equals(currentMode)) {
+            if (!RepositoryMode.READ_ONLY.equals(currentMode)) {
+                LOGGER.warn("Parameter repository only supports READ_ONLY mode, but configured as:" + currentMode);
+            }
+            return RepositoryMode.READ_ONLY;
+        }
+        return RepositoryMode.NONE;
+    }
+
+    @Override
+    public List<String> getParameterQualifiers(ParameterMetadata metadata) {
+        List<String> qualifiers = new ArrayList<String>();
+        String parameterPrefix = metadata.getDomain() + "." + metadata.getParameter() + ".";
+        for (String paramFullName : this.properties.stringPropertyNames()) {
+            if (paramFullName.startsWith(parameterPrefix)) {
+                qualifiers.add(ParameterMetadata.parseQualifier(paramFullName, metadata.getParameter()));
+            }
+        }
+        return qualifiers;
+    }
 }

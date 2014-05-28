@@ -58,6 +58,7 @@ public class DefaultParameterResolver implements ParameterResolver {
         metadata.setConverter(this.resolveConverter(method, metadata.getAttribute()));
         metadata.setOptional(this.resolveOptional(method, metadata.getAttribute()));
         metadata.setDefaultValue(this.resolveDefaultValue(method, metadata.getAttribute()));
+        metadata.setReadOnly(this.isReadOnly(method, metadata.getAttribute()));
         this.resolveQualifier(metadata, method, invocationArgumnets);
         return metadata;
     }
@@ -75,12 +76,32 @@ public class DefaultParameterResolver implements ParameterResolver {
         return null;
     }
 
+    /**
+     * @param method
+     * @param attributeName
+     * @return true if method is a setter or there is a setter for the getter
+     */
+    protected boolean isReadOnly(Method method, String attributeName) {
+        Operation operation = Operation.valueOfByMethodName(method.getName());
+        if (Operation.WRITE.equals(operation)) {
+            return false;
+        } else {
+            String methodWithoutPrefix = StringUtils.capitalize(attributeName);
+            for (Method currMethod : method.getDeclaringClass().getMethods()) {
+                if (currMethod.getName().equals("set" + methodWithoutPrefix)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
     protected <T extends Annotation> T findAnnotation(Class<T> annotationType, Method method, String attributeName) {
         T annotation = method.getAnnotation(annotationType);
         if (annotation == null) {
             //not found on the specified method. for setters it looks for getter annotations
             Operation operation = Operation.valueOfByMethodName(method.getName());
-            String methodWithoutPrefix=StringUtils.capitalize(attributeName);
+            String methodWithoutPrefix = StringUtils.capitalize(attributeName);
             if (Operation.WRITE.equals(operation)) {
                 for (Method currMethod : method.getDeclaringClass().getMethods()) {
                     if (currMethod.getName().endsWith(methodWithoutPrefix)) {

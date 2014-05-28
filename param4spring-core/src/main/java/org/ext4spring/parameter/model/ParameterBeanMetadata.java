@@ -38,7 +38,7 @@ public class ParameterBeanMetadata {
     
     public ParameterMetadata getParameter(String parameterName) {
         for (ParameterMetadata metadata:this.parameters) {
-            if (metadata.getParameter().equals(parameterName)) {
+            if (metadata.getParameter().equals(parameterName) || parameterName.equals(metadata.getAttribute())) {
                 return metadata;
             }
         }

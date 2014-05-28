@@ -16,6 +16,7 @@
 package org.ext4spring.parameter;
 
 import java.util.List;
+import java.util.Set;
 
 import org.ext4spring.parameter.exception.ParameterException;
 import org.ext4spring.parameter.model.ParameterBeanMetadata;
@@ -55,8 +56,18 @@ public interface ParameterBeanService {
     <T> void writeParameterBean(T parameterBean) throws ParameterException;
 
     /**
-     * Registers a class as parameter bean. read/writeParameterBean indirectly also registers bean and all AOP proxied parameter
-     * beans are also registered automatically.
+     * Writes the parameter bean values into the underlying repositories. For the qualified parameters uses the
+     * parameterQualifier parameter.
+     * 
+     * @param parameterBean
+     * @param parameterQualifier If it is null it saves to the default qualifier
+     * @throws ParameterException
+     */
+    <T> void writeParameterBean(T parameterBean, String parameterQualifier) throws ParameterException;
+
+    /**
+     * Registers a class as parameter bean. read/writeParameterBean indirectly also registers bean and all AOP proxied
+     * parameter beans are also registered automatically.
      * 
      * @param parameterBeanClass
      * @throws ParameterException
@@ -70,4 +81,10 @@ public interface ParameterBeanService {
      * @throws ParameterException
      */
     List<ParameterBeanMetadata> listParameterBeans() throws ParameterException;
+
+    /**
+     * Unique list of all existing qualifiers in the repository for the given parameter class
+     */
+    Set<String> getQualifiers(Class<?> parameterBeanClass) throws ParameterException;
+
 }

@@ -96,7 +96,7 @@ public class ApplicationSettings {
         this.releaseDate = releaseDate;
     }
 
-    @Parameter(converter = TVConverter.class)
+    @Parameter(converter = TVConverter.class, optional=true)
     public String getXmlConfig() {
         return xmlConfig;
     }
@@ -115,6 +115,9 @@ public class ApplicationSettings {
         return this.userColor;
     }
 
+    public void setUserColor(String userColor) {
+        this.userColor = userColor;
+    }
     /**
      * Parameter with qualifier but single value as bean attribute
      * @param userName

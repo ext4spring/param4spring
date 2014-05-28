@@ -15,7 +15,9 @@
  ******************************************************************************/
 package org.ext4spring.parameter.dao;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -27,53 +29,64 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class JdbcParameterRepository extends AbstractParameterRepository {
 
-	private final String DEFAULT_COUNT_QUERY = "SELECT count(*) FROM parameters WHERE domain=:domain AND parameter=:parameter";
-	private final String DEFAULT_SELECT_QUERY = "SELECT data FROM parameters WHERE domain=:domain AND parameter=:parameter";
-	private final String DEFAULT_INSERT_QUERY = "INSERT INTO parameters(domain, parameter, data) VALUES(:domain,:parameter,:data)";
-	private final String DEFAULT_UPDATE_QUERY = "UPDATE parameters SET data=:data WHERE domain=:domain AND parameter=:parameter";
+    private final String DEFAULT_COUNT_QUERY = "SELECT count(*) FROM parameters WHERE domain=:domain AND parameter=:parameter";
+    private final String DEFAULT_SELECT_QUERY = "SELECT data FROM parameters WHERE domain=:domain AND parameter=:parameter";
+    private final String DEFAULT_INSERT_QUERY = "INSERT INTO parameters(domain, parameter, data) VALUES(:domain,:parameter,:data)";
+    private final String DEFAULT_UPDATE_QUERY = "UPDATE parameters SET data=:data WHERE domain=:domain AND parameter=:parameter";
+    private final String DEFAULT_QUALIFIER_QUERY = "SELECT parameters.PARAMETER FROM parameters WHERE DOMAIN=:domain AND PARAMETER LIKE :parameterPrefix";
 
-	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-	private String countQuery = DEFAULT_COUNT_QUERY;
-	private String selectQuery = DEFAULT_SELECT_QUERY;
-	private String insertStatement = DEFAULT_INSERT_QUERY;
-	private String updateStatement = DEFAULT_UPDATE_QUERY;
+    private String countQuery = DEFAULT_COUNT_QUERY;
+    private String selectQuery = DEFAULT_SELECT_QUERY;
+    private String insertStatement = DEFAULT_INSERT_QUERY;
+    private String updateStatement = DEFAULT_UPDATE_QUERY;
 
-	@Required
-	public void setDataSource(DataSource dataSource) {
-		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(
-				dataSource);
-	}
+    @Required
+    public void setDataSource(DataSource dataSource) {
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+    }
 
-	@Override
-	public boolean parameterExists(ParameterMetadata metadata) {
-		MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-		namedParameters.addValue("domain", metadata.getDomain());
-		namedParameters.addValue("parameter", metadata.getFullParameterName());
-		return (namedParameterJdbcTemplate.queryForInt(this.countQuery,
-				namedParameters) > 0);
-	}
+    @Override
+    public boolean parameterExists(ParameterMetadata metadata) {
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        namedParameters.addValue("domain", metadata.getDomain());
+        namedParameters.addValue("parameter", metadata.getFullParameterName());
+        return (namedParameterJdbcTemplate.queryForInt(this.countQuery, namedParameters) > 0);
+    }
 
-	@Override
-	public String getValue(ParameterMetadata metadata) {
-		MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-		namedParameters.addValue("domain", metadata.getDomain());
-		namedParameters.addValue("parameter", metadata.getFullParameterName());
-		return namedParameterJdbcTemplate.queryForObject(this.selectQuery,
-				namedParameters, String.class);
-	}
+    @Override
+    public List<String> getParameterQualifiers(ParameterMetadata metadata) {
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        namedParameters.addValue("domain", metadata.getDomain());
+        namedParameters.addValue("parameterPrefix", metadata.getParameter()+".%");
+        List<String> paramsWithQualifier=namedParameterJdbcTemplate.queryForList(DEFAULT_QUALIFIER_QUERY, namedParameters, String.class);
+        List<String> qualifiers=new ArrayList<String>();
+        for (String paramFullName:paramsWithQualifier) {
+            qualifiers.add(ParameterMetadata.parseQualifier(paramFullName, metadata.getParameter()));
+        }
+        return qualifiers;
+    }
 
-	@Override
-	public void setValue(ParameterMetadata metadata, String value) {
-		Map<String, Object> parameters = new HashMap<String, Object>();
-		parameters.put("domain", metadata.getDomain());
-		parameters.put("parameter", metadata.getFullParameterName());
-		parameters.put("data", value);
-		if (this.parameterExists(metadata)) {
-			this.namedParameterJdbcTemplate.update(updateStatement, parameters);
-		} else {
-			this.namedParameterJdbcTemplate.update(insertStatement, parameters);
-		}
-	}
+    @Override
+    public String getValue(ParameterMetadata metadata) {
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        namedParameters.addValue("domain", metadata.getDomain());
+        namedParameters.addValue("parameter", metadata.getFullParameterName());
+        return namedParameterJdbcTemplate.queryForObject(this.selectQuery, namedParameters, String.class);
+    }
+
+    @Override
+    public void setValue(ParameterMetadata metadata, String value) {
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("domain", metadata.getDomain());
+        parameters.put("parameter", metadata.getFullParameterName());
+        parameters.put("data", value);
+        if (this.parameterExists(metadata)) {
+            this.namedParameterJdbcTemplate.update(updateStatement, parameters);
+        } else {
+            this.namedParameterJdbcTemplate.update(insertStatement, parameters);
+        }
+    }
 
 }

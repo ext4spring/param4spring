@@ -33,7 +33,8 @@ public class ParameterMetadata {
     private boolean optional;
     private boolean qualified;
     private String qualifier;
-
+    private boolean readOnly;
+    
     /**
      * parameter name with its qualifier (if has one)
      * 
@@ -42,11 +43,19 @@ public class ParameterMetadata {
     public String getFullParameterName() {
         //local variable is necassary for json serialization, so thats why we set the value instead of simply return
         if (qualifier != null) {
-            this.fullParameterName = parameter + "." + qualifier;
+            this.fullParameterName = createFullName(parameter, qualifier);
         } else {
             this.fullParameterName = parameter;
         }
         return this.fullParameterName;
+    }
+    
+    public static String parseQualifier(String fullParameterName, String parameterName) {
+        return fullParameterName.substring(parameterName.length()+1);
+    }
+
+    public static String createFullName(String parameterName, String qualifier) {
+        return parameterName + "." + qualifier;
     }
 
     public String getDefaultValue() {
@@ -117,7 +126,7 @@ public class ParameterMetadata {
 
     @Override
     public String toString() {
-        return "Metadata [typeClass=" + typeClass + ", domain=" + domain + ", attribute=" + attribute + ", parameter=" + parameter + ", defaultValue=" + defaultValue + ", converter=" + converter
+        return "Metadata [parameter=" + parameter + ", domain=" + domain + ", typeClass=" + typeClass + ", attribute=" + attribute + ", defaultValue=" + defaultValue + ", converter=" + converter
                 + ", optional=" + optional + ", qualified=" + qualified + ", qualifier=" + qualifier + "]";
     }
 
@@ -156,5 +165,15 @@ public class ParameterMetadata {
         } else if (!typeClass.equals(other.typeClass)) return false;
         return true;
     }
+
+    public boolean isReadOnly() {
+        return this.readOnly;
+    }
+    
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+    
+    
 
 }
