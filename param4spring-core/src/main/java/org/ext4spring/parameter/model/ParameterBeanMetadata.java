@@ -14,6 +14,7 @@ public class ParameterBeanMetadata {
     private boolean qualified;
     private Class<?> parameterBeanClass;
     private String domain;
+    private String comment;
     private final List<ParameterMetadata> parameters=new ArrayList<ParameterMetadata>(); 
     
     public String getDomain() {
@@ -55,5 +56,13 @@ public class ParameterBeanMetadata {
     
     public void setParameterBeanClass(Class<?> parameterBeanClass) {
         this.parameterBeanClass = parameterBeanClass;
+    }
+    
+    public String getComment() {
+        return comment;
+    }
+    
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

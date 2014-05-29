@@ -21,6 +21,7 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.ext4spring.parameter.example.ApplicationSettings;
+import org.ext4spring.parameter.exception.ValueOutOfBoundsValidationException;
 import org.ext4spring.parameter.model.ParameterBeanMetadata;
 import org.junit.Assert;
 import org.junit.Test;
@@ -63,9 +64,17 @@ public class DefaultParameterBeanServiceTest extends TestBase {
         ApplicationSettings applicationSettings = this.parameterBeanService.readParameterBean(ApplicationSettings.class);
         applicationSettings.setName("Changed name");
         this.parameterBeanService.writeParameterBean(applicationSettings);
-        Assert.assertEquals(1, jdbcTemplate.queryForInt("Select count(*) from parameters where data='\"Changed name\"'"));
+        Assert.assertEquals(1, jdbcTemplate.queryForInt("Select count(*) from parameters where data='Changed name'"));
     }
-    
+  
+    @Test(expected = ValueOutOfBoundsValidationException.class)
+    public void testModifyAutoproxiedPropertyIsValidated() {
+        ApplicationSettings applicationSettings = this.parameterBeanService.readParameterBean(ApplicationSettings.class);
+        applicationSettings.setPrice(50);
+        this.parameterBeanService.writeParameterBean(applicationSettings);
+   }
+
+
     @Test
     public void testListManuallyRegisteredParameterBeanMetadatas() {
         this.parameterBeanService.register(ApplicationSettings.class);

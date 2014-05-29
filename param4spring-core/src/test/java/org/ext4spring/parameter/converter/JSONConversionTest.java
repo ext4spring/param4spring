@@ -17,20 +17,19 @@ package org.ext4spring.parameter.converter;
 
 import java.util.List;
 
-import org.ext4spring.parameter.converter.Converter;
 import org.ext4spring.parameter.converter.json.JSONConverter;
-import org.ext4spring.parameter.converter.json.JSONConverterFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class JSONConversionTest extends AbstractConverterTest {
 
+    private Converter converter = new JSONConverter();
+
     @Override
-    protected ConverterFactory getConverterFactory() {
-        return new JSONConverterFactory();
+    protected Converter getConverter() {
+        return converter;
     }
 
-    private Converter converter = new JSONConverter();
 
     @Test
     public void testStringConverter() {

@@ -4,8 +4,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.ext4spring.parameter.SpringComponents;
 import org.ext4spring.parameter.converter.Converter;
 import org.ext4spring.parameter.exception.ParameterConverterException;
+import org.springframework.stereotype.Component;
 
 /**
  * Simple converter uses .toString and .valueOf for conversion
@@ -15,6 +17,7 @@ import org.ext4spring.parameter.exception.ParameterConverterException;
  * @author pborbas
  *
  */
+@Component(SpringComponents.defaultConverter)
 public class TVConverter implements Converter {
 
     @Override

@@ -25,12 +25,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ext4spring.parameter.converter.ConverterFactory;
 import org.ext4spring.parameter.dao.ParameterRepository;
-import org.ext4spring.parameter.exception.ParameterConverterException;
 import org.ext4spring.parameter.exception.ParameterException;
 import org.ext4spring.parameter.exception.ParameterUndefinedException;
 import org.ext4spring.parameter.exception.RepositoryNotFoundException;
 import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.RepositoryMode;
+import org.ext4spring.parameter.validation.ParameterValidator;
+import org.ext4spring.parameter.validation.ParameterValidatorFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.cache.annotation.CacheEvict;
@@ -44,6 +45,8 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
 
     private ApplicationContext applicationContext;
     private ConverterFactory converterFactory;
+    private ParameterValidatorFactory parameterValidatorFactory;
+    private boolean validationEnabled = true;
 
     private LinkedHashSet<ParameterRepository> repositories;
 
@@ -56,18 +59,7 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
         if (repository != null) {
             String stringValue = repository.getValue(metadata);
             if (stringValue != null) {
-                if (metadata.getConverter() == null) {
-                    // value from repository			    
-                    value = this.converterFactory.getConverter(metadata.getTypeClass()).toTypedValue(stringValue, metadata.getTypeClass());
-                } else {
-                    try {
-                        value = metadata.getConverter().newInstance().toTypedValue(stringValue, metadata.getTypeClass());
-                    } catch (InstantiationException e) {
-                        throw new ParameterConverterException(e);
-                    } catch (IllegalAccessException e) {
-                        throw new ParameterConverterException(e);
-                    }
-                }
+                value=this.converterFactory.get(metadata.getConverter()).toTypedValue(stringValue, metadata.getTypeClass());
             }
         } else {
             LOGGER.warn("No repository found for: " + metadata);
@@ -75,47 +67,49 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
         if (value == null) {
             if (metadata.getDefaultValue() != null && metadata.getDefaultValue().length() > 0) {
                 // default by annotation
-                value = this.converterFactory.getConverter(metadata.getTypeClass()).toTypedValue(metadata.getDefaultValue(), metadata.getTypeClass());
+                value=this.converterFactory.get(metadata.getConverter()).toTypedValue(metadata.getDefaultValue(), metadata.getTypeClass());
             } else {
                 // default by real method invocation of parameter bean
                 value = methodReturnValue;
             }
         }
-        if (value==null && !metadata.isOptional()) {
-            throw new ParameterUndefinedException("Parameter not found in any repositories and doesn't have a default value:"+metadata+". Set value or mark as optional.");
+        if (value == null && !metadata.isOptional()) {
+            throw new ParameterUndefinedException("Parameter not found in any repositories and doesn't have a default value:" + metadata + ". Set value or mark as optional.");
         }
         return value;
     }
 
     @Override
     @CacheEvict(value = Cache.CACHE_REGION, key = "#metadata")
-    public void write(ParameterMetadata metadata, Object value) {
+    public void write(ParameterMetadata metadata, Object value, Object parameterObject) {
         ParameterRepository repository = this.getWriteableRepository(metadata);
         if (repository != null) {
-            if (metadata.getConverter() == null) {
-                repository.setValue(metadata, this.converterFactory.getConverter(metadata.getTypeClass()).toStringValue(value));
+            this.validate(metadata, value, parameterObject);
+            if (value == null) {
+                //TODO: cover with test
+                repository.setValue(metadata, metadata.getDefaultValue());
             } else {
-                //TODO test
-                try {
-                    repository.setValue(metadata, metadata.getConverter().newInstance().toStringValue(value));
-                } catch (InstantiationException e) {
-                    throw new ParameterConverterException(e);
-                } catch (IllegalAccessException e) {
-                    throw new ParameterConverterException(e);
-                }
+                repository.setValue(metadata, this.converterFactory.get(metadata.getConverter()).toStringValue(value));
             }
-
         } else {
             LOGGER.error("Not writeable repository found for:" + metadata);
             throw new RepositoryNotFoundException("No writeable repository found for:" + metadata);
 
         }
     }
-    
+
+    private void validate(ParameterMetadata metadata, Object value, Object parameterObject) {
+        if (this.validationEnabled) {
+            for (Class<? extends ParameterValidator> validatorClass : metadata.getValidators()) {
+                this.parameterValidatorFactory.getValidator(validatorClass).validate(metadata, value, parameterObject);
+            }
+        }
+    }
+
     @Override
     public List<String> getParameterQualifiers(ParameterMetadata metadata) {
-        ParameterRepository repository=this.getReadableRepository(metadata);
-        if (repository!=null) {
+        ParameterRepository repository = this.getReadableRepository(metadata);
+        if (repository != null) {
             return repository.getParameterQualifiers(metadata);
         } else {
             return new ArrayList<String>(0);
@@ -155,7 +149,6 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
                     break;
                 case READ_ONLY:
                     if (repository.parameterExists(metadata)) {
-                        //the parameter had been read from a read only repo, so it cannot be saved
                         throw new ParameterException("The parameter had been read from a read only repo, so it cannot be saved. Repository:" + repository + " Parameter:" + metadata);
                     }
                     break;
@@ -177,11 +170,18 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
         this.applicationContext = applicationContext;
     }
 
+    public void setValidationEnabled(boolean validationEnabled) {
+        this.validationEnabled = validationEnabled;
+        LOGGER.info("Parameter validation enabled:" + validationEnabled);
+    }
+
     @PostConstruct
     public void init() {
         if (this.converterFactory == null) {
-            // use the default if not set manually
-            this.converterFactory = (ConverterFactory) this.applicationContext.getBean(SpringComponents.defaultConverterFactory);
+             this.converterFactory = (ConverterFactory) this.applicationContext.getBean(SpringComponents.defaultConverterFactory);
+        }
+        if (this.parameterValidatorFactory == null) {
+            this.parameterValidatorFactory = (ParameterValidatorFactory) this.applicationContext.getBean(SpringComponents.defaultParameterValidatorFactory);
         }
     }
 

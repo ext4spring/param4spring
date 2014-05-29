@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.ext4spring.parameter.exception.ParameterConverterException;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PropertiesConverter implements Converter {
 
     @Override

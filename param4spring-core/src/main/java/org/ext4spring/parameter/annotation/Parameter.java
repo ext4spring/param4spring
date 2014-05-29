@@ -56,9 +56,5 @@ public @interface Parameter {
 	 */
 	Class<? extends Converter>[] converter() default {};
 	
-	/**
-	 * By default if its not in any of the repositories and the method returns null, it throws a ParameterException
-	 * If its true, null default value is allowed
-	 */
-	boolean optional() default false;
+
 }

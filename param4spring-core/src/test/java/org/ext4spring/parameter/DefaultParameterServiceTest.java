@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 
 import org.ext4spring.parameter.converter.ConverterFactory;
-import org.ext4spring.parameter.converter.simple.StringConverter;
+import org.ext4spring.parameter.converter.tv.TVConverter;
 import org.ext4spring.parameter.dao.ParameterRepository;
 import org.ext4spring.parameter.exception.ParameterException;
 import org.ext4spring.parameter.exception.ParameterUndefinedException;
@@ -47,7 +47,7 @@ public class DefaultParameterServiceTest extends TestBase {
 
     @Before
     public void init() {
-        Mockito.when(mockConverterFactory.getConverter(String.class)).thenReturn(new StringConverter());
+        Mockito.when(mockConverterFactory.get(TVConverter.class)).thenReturn(new TVConverter());
 
     }
 
@@ -68,6 +68,7 @@ public class DefaultParameterServiceTest extends TestBase {
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
+        metadata.setConverter(TVConverter.class);
 
         Assert.assertEquals("asd", parameterService.read(metadata, null));
     }
@@ -138,6 +139,7 @@ public class DefaultParameterServiceTest extends TestBase {
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
         metadata.setDefaultValue("defaultValue");
+        metadata.setConverter(TVConverter.class);
 
         Assert.assertEquals("defaultValue", parameterService.read(metadata, null));
     }
@@ -160,6 +162,7 @@ public class DefaultParameterServiceTest extends TestBase {
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
         metadata.setDefaultValue("");
+        metadata.setConverter(TVConverter.class);
 
         Assert.assertEquals("defaultValue", parameterService.read(metadata, "defaultValue"));
     }
@@ -177,6 +180,7 @@ public class DefaultParameterServiceTest extends TestBase {
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
         metadata.setDefaultValue(null);
+        metadata.setConverter(TVConverter.class);
 
         try {
             parameterService.read(metadata, "defaultValue");
@@ -199,9 +203,10 @@ public class DefaultParameterServiceTest extends TestBase {
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
         metadata.setDefaultValue(null);
+        metadata.setConverter(TVConverter.class);
 
         try {
-            parameterService.write(metadata, "value");
+            parameterService.write(metadata, "value", null);
             Assert.assertTrue("Exception should thrown", false);
         } catch (RepositoryNotFoundException e) {
         }
@@ -224,8 +229,9 @@ public class DefaultParameterServiceTest extends TestBase {
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
+        metadata.setConverter(TVConverter.class);
 
-        parameterService.write(metadata, "value");
+        parameterService.write(metadata, "value", null);
         Mockito.verify(mockParameterRepository).setValue(metadata, "value");
     }
 
@@ -242,6 +248,7 @@ public class DefaultParameterServiceTest extends TestBase {
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
+        metadata.setConverter(TVConverter.class);
 
         DefaultParameterService parameterService = new DefaultParameterService();
         parameterService.setConverterFactory(mockConverterFactory);
@@ -266,6 +273,7 @@ public class DefaultParameterServiceTest extends TestBase {
         metadata.setDomain("domain");
         metadata.setParameter("parameter");
         metadata.setTypeClass(String.class);
+        metadata.setConverter(TVConverter.class);
 
         DefaultParameterService parameterService = new DefaultParameterService();
         parameterService.setConverterFactory(mockConverterFactory);

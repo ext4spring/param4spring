@@ -72,15 +72,8 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
         } catch (NoSuchFieldException e) {
             throw new ParameterUndefinedException("Parameter field:" + fieldName + " not found in class:" + typeClass + ". Error:" + e);
         }
-//                for (Field field : typeClass.getFields()) {
-//            if (field.getName().equalsIgnoreCase(fieldName)) {
-//                return field;
-//            }
-//        }
-//        throw new ParameterUndefinedException("Parameter field:" + fieldName + " not found in class:" + typeClass);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T readParameterBean(Class<T> typeClass, String parameterQualifier) throws ParameterException {
         LOGGER.debug("Reading parameters for class:" + typeClass + ", qualifier:" + parameterQualifier);
@@ -102,6 +95,8 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
 
             this.register(typeClass);
             return paramterBean;
+        } catch (ParameterException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.error("Error happened while reading parameter bean:" + typeClass + "." + e, e);
             throw new ParameterException("Error happened while reading parameter bean:" + typeClass + "." + e, e);
@@ -127,12 +122,14 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
                     if (parameterMetadata.isQualified()) {
                         parameterMetadata.setQualifier(parameterQualifier);
                     }
-                    this.parameterService.write(parameterMetadata, field.get(parameterBean));
+                    this.parameterService.write(parameterMetadata, field.get(parameterBean), parameterBean);
                     field.setAccessible(false);
 
                 }
             }
             this.register(parameterBean.getClass());
+        } catch (ParameterException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.error("Error happened while writing parameter bean:" + parameterBean + "." + e, e);
             throw new ParameterException("Error happened while writing parameter bean:" + parameterBean + "." + e, e);

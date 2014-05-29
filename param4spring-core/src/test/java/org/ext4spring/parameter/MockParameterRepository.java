@@ -24,7 +24,7 @@ import org.ext4spring.parameter.model.RepositoryMode;
 
 public class MockParameterRepository implements ParameterRepository {
 
-	private String value = "\"initialValue\"";
+	private String value = "initialValue";
 	public static int getCounter;
 	public static int setCounter;
 

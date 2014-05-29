@@ -21,11 +21,12 @@ import org.ext4spring.parameter.exception.ParameterConverterException;
  * Creates the right converter for the parameter type
  * 
  * @author Peter Borbas
- * 
  */
 public interface ConverterFactory {
-
-	public Converter getConverter(Class<?> clazz)
-			throws ParameterConverterException;
+    
+    /**
+    * Returns an instance of the converter class
+    */
+    public <T extends Converter> T get(Class<T> converterClass) throws ParameterConverterException;
 
 }

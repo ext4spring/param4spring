@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.ext4spring.parameter.converter.simple;
+package org.ext4spring.parameter.annotation;
 
-import org.ext4spring.parameter.converter.Converter;
-import org.springframework.stereotype.Component;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Component
-public class StringConverter implements Converter {
+/**
+ * Comment is included in the parameter metadata. The repository implementations can use this info to populate the persistence storage with comments
+ * 
+ * @author Peter Borbas
+ * 
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 
-	@Override
-	public String toStringValue(Object typedValue) {
-		return (typedValue != null) ? typedValue.toString() : "";
-	}
+public @interface ParameterComment {
 
-	@Override
-	public <T> T toTypedValue(String stringValue, Class<T> type) {
-		return type.cast(stringValue);
-	}
+	String value();
 
-	@Override
-	public Class<String> getHandledClass() {
-		return String.class;
-	}
 }

@@ -24,6 +24,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.ext4spring.parameter.annotation.ParameterBean;
+import org.ext4spring.parameter.annotation.ParameterComment;
 import org.ext4spring.parameter.model.ParameterBeanMetadata;
 import org.ext4spring.parameter.model.ParameterMetadata;
 import org.springframework.beans.BeansException;
@@ -42,6 +43,7 @@ public class DefaultParameterBeanResolver implements ParameterBeanResolver, Appl
         ParameterBeanMetadata beanMetadata = new ParameterBeanMetadata();
         beanMetadata.setParameterBeanClass(parameterClass);
         beanMetadata.setDomain(this.resolveDomain(parameterClass));
+        beanMetadata.setComment(this.resolveComment(parameterClass));
         for (Field field : this.getSupportedFields(parameterClass)) {
             for (Method method : parameterClass.getMethods()) {
                 if ((method.getName().startsWith("get") && method.getName().substring(3).toLowerCase().equals(field.getName().toLowerCase()))
@@ -86,6 +88,14 @@ public class DefaultParameterBeanResolver implements ParameterBeanResolver, Appl
             domain = parameterClass.getCanonicalName();
         }
         return domain;
+    }
+
+    private String resolveComment(Class<?> parameterClass) {
+        if (parameterClass.isAnnotationPresent(ParameterComment.class)) {
+            return parameterClass.getAnnotation(ParameterComment.class).value();
+        } else {
+            return "";
+        }
     }
 
     @Override

@@ -23,8 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.ext4spring.parameter.ParameterResolver;
 import org.ext4spring.parameter.ParameterService;
 import org.ext4spring.parameter.SpringComponents;
-import org.ext4spring.parameter.model.ParameterMetadata;
 import org.ext4spring.parameter.model.Operation;
+import org.ext4spring.parameter.model.ParameterMetadata;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -68,7 +68,7 @@ public class DefaultParameterAdvice implements ParameterAdvice,
 			return parameterService.read(metadata, invocation.proceed());
 		} else if (Operation.WRITE.equals(operation)) {
 			invocation.proceed();
-			parameterService.write(metadata, invocation.getArguments()[0]);
+			parameterService.write(metadata, invocation.getArguments()[0], invocation.getThis());
 		}
 		return null;
 	}

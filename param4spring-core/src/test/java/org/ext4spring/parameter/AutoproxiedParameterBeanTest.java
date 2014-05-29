@@ -18,6 +18,7 @@ package org.ext4spring.parameter;
 import java.util.List;
 
 import org.ext4spring.parameter.example.ApplicationSettings;
+import org.ext4spring.parameter.exception.ValueOutOfBoundsValidationException;
 import org.ext4spring.parameter.model.ParameterBeanMetadata;
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,9 +26,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("/testAutoproxyContext.xml")
+@ContextConfiguration("/testAutoproxiedHsqlContext.xml")
+@Transactional
+@TransactionConfiguration(defaultRollback = true)
 public class AutoproxiedParameterBeanTest extends TestBase {
 
     @Autowired
@@ -40,6 +45,17 @@ public class AutoproxiedParameterBeanTest extends TestBase {
     public void testPropertyValuesReadByParameterAspect() throws InterruptedException {
         TestUtil.assertApplicationSettingsValid(this.applicationSettings);
         TestUtil.assertQualifiedApplicationSettingsValid(applicationSettings);
+    }
+
+    @Test
+    public void testModifyAutoproxiedProperty() {
+        applicationSettings.setName("new name");
+        Assert.assertEquals("new name", applicationSettings.getName());
+    }
+
+    @Test(expected = ValueOutOfBoundsValidationException.class)
+    public void testModifyAutoproxiedPropertyIsValidated() {
+        applicationSettings.setPrice(50);
     }
 
     @Test

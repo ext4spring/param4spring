@@ -16,12 +16,15 @@
 package org.ext4spring.parameter.converter.json;
 
 import java.text.DateFormat;
+import java.util.Map;
 
 import org.codehaus.jackson.JsonParser.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.ext4spring.parameter.converter.Converter;
 import org.ext4spring.parameter.exception.ParameterConverterException;
+import org.springframework.stereotype.Component;
 
+@Component
 public class JSONConverter implements Converter {
 
     private final ObjectMapper mapper;
@@ -37,8 +40,10 @@ public class JSONConverter implements Converter {
         this.mapper.getDeserializationConfig().setDateFormat(dateFormat);
     }
 
-    public void setJacksonFeature(Feature feature, boolean state) {
-        this.mapper.configure(feature, state);
+    public void setJacksonFeatures(Map<String, Boolean> jacksonFeatures) {
+        for (String featureName : jacksonFeatures.keySet()) {
+            this.mapper.configure(Feature.valueOf(featureName), jacksonFeatures.get(featureName));
+        }
     }
 
     @Override

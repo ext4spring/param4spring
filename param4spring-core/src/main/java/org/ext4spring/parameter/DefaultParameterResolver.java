@@ -17,15 +17,24 @@ package org.ext4spring.parameter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ext4spring.parameter.annotation.Parameter;
 import org.ext4spring.parameter.annotation.ParameterBean;
+import org.ext4spring.parameter.annotation.ParameterComment;
 import org.ext4spring.parameter.annotation.ParameterQualifier;
+import org.ext4spring.parameter.annotation.ParameterValidation;
 import org.ext4spring.parameter.converter.Converter;
 import org.ext4spring.parameter.model.Operation;
 import org.ext4spring.parameter.model.ParameterMetadata;
+import org.ext4spring.parameter.validation.DefaultParameterValidator;
+import org.ext4spring.parameter.validation.ParameterValidator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -34,6 +43,7 @@ public class DefaultParameterResolver implements ParameterResolver {
 
     // map for change primitives to objects
     private final Map<String, Class<?>> typeMap = new HashMap<String, Class<?>>();
+    private Converter defaultConverter;
 
     public DefaultParameterResolver() {
         typeMap.put("byte", Byte.class);
@@ -57,8 +67,13 @@ public class DefaultParameterResolver implements ParameterResolver {
         metadata.setParameter(this.resolveParameterName(method, metadata.getAttribute()));
         metadata.setConverter(this.resolveConverter(method, metadata.getAttribute()));
         metadata.setOptional(this.resolveOptional(method, metadata.getAttribute()));
+        metadata.setMin(this.resolveMin(method, metadata.getAttribute()));
+        metadata.setMax(this.resolveMax(method, metadata.getAttribute()));        
+        metadata.setFormat(this.resolveFormat(method, metadata.getAttribute()));
         metadata.setDefaultValue(this.resolveDefaultValue(method, metadata.getAttribute()));
         metadata.setReadOnly(this.isReadOnly(method, metadata.getAttribute()));
+        metadata.setValidators(this.resolveValidators(method, metadata.getAttribute()));
+        metadata.setComment(this.resolveComment(method, metadata.getAttribute()));
         this.resolveQualifier(metadata, method, invocationArgumnets);
         return metadata;
     }
@@ -102,7 +117,7 @@ public class DefaultParameterResolver implements ParameterResolver {
             //not found on the specified method. for setters it looks for getter annotations
             Operation operation = Operation.valueOfByMethodName(method.getName());
             String methodWithoutPrefix = StringUtils.capitalize(attributeName);
-            if (Operation.WRITE.equals(operation)) {
+          //  if (Operation.WRITE.equals(operation)) {
                 for (Method currMethod : method.getDeclaringClass().getMethods()) {
                     if (currMethod.getName().endsWith(methodWithoutPrefix)) {
                         if (currMethod.getAnnotation(annotationType) != null) {
@@ -110,7 +125,7 @@ public class DefaultParameterResolver implements ParameterResolver {
                         }
                     }
                 }
-            }
+            //}
         }
         return annotation;
     }
@@ -132,19 +147,74 @@ public class DefaultParameterResolver implements ParameterResolver {
     }
 
     private boolean resolveOptional(Method method, String attributeName) {
-        Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, attributeName);
-        if (parameterAnnotation != null) {
-            return parameterAnnotation.optional();
+        ParameterValidation validationAnnotation = this.findAnnotation(ParameterValidation.class, method, attributeName);
+        if (validationAnnotation != null) {
+            return validationAnnotation.optional();
         }
         return false;
     }
 
+    private Double resolveMin(Method method, String attributeName) {
+        ParameterValidation validationAnnotation = this.findAnnotation(ParameterValidation.class, method, attributeName);
+        if (validationAnnotation != null) {
+            if (validationAnnotation.min() !=null && validationAnnotation.min().length==1) {
+                return validationAnnotation.min()[0];
+            }
+        }
+        return null;
+    }
+
+    private Double resolveMax(Method method, String attributeName) {
+        ParameterValidation validationAnnotation = this.findAnnotation(ParameterValidation.class, method, attributeName);
+        if (validationAnnotation != null) {
+            if (validationAnnotation.max() !=null && validationAnnotation.max().length==1) {
+                return validationAnnotation.max()[0];
+            }
+        }
+        return null;
+    }
+
+    private String resolveFormat(Method method, String attributeName) {
+        ParameterValidation validationAnnotation = this.findAnnotation(ParameterValidation.class, method, attributeName);
+        if (validationAnnotation != null) {
+            if (validationAnnotation.format() !=null && validationAnnotation.format().length==1) {
+                return validationAnnotation.format()[0];
+            }
+        }
+        return null;
+    }
+
+    private String resolveComment(Method method, String attributeName) {
+        ParameterComment validationComment = this.findAnnotation(ParameterComment.class, method, attributeName);
+        if (validationComment != null) {
+            return validationComment.value();
+        }
+        return null;
+    }
+    
+    private List<Class<? extends ParameterValidator>> resolveValidators(Method method, String attributeName) {
+        List<Class<? extends ParameterValidator>> validatorClasses=new ArrayList<Class<? extends ParameterValidator>>();
+        ParameterValidation validationAnnotation = this.findAnnotation(ParameterValidation.class, method, attributeName);
+        if (validationAnnotation != null) {
+            if (validationAnnotation.validators() !=null) {
+                if (validationAnnotation.validators().length==0) {
+                    validatorClasses.add(DefaultParameterValidator.class);
+                } else {
+                    validatorClasses.addAll(Arrays.asList(validationAnnotation.validators()));
+                }
+            }
+        } else {
+            validatorClasses.add(DefaultParameterValidator.class);            
+        }
+        return validatorClasses;
+    }
+    
     private Class<? extends Converter> resolveConverter(Method method, String attributeName) {
         Parameter parameterAnnotation = this.findAnnotation(Parameter.class, method, attributeName);
         if (parameterAnnotation != null && parameterAnnotation.converter().length > 0) {
             return parameterAnnotation.converter()[0];
         }
-        return null;
+        return this.defaultConverter.getClass();
     }
 
     private String resolveDefaultValue(Method method, String attributeName) {
@@ -189,4 +259,12 @@ public class DefaultParameterResolver implements ParameterResolver {
         }
         return domain;
     }
+    
+    @Autowired(required=false)
+    @Qualifier(SpringComponents.defaultConverter)
+    public void setDefaultConverter(Converter defaultConverter) {
+        this.defaultConverter = defaultConverter;
+    }
+    
+
 }

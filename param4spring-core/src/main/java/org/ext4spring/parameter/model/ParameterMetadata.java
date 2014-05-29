@@ -15,7 +15,11 @@
  ******************************************************************************/
 package org.ext4spring.parameter.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ext4spring.parameter.converter.Converter;
+import org.ext4spring.parameter.validation.ParameterValidator;
 
 /**
  * Describes one parameter of a parameter bean
@@ -29,33 +33,40 @@ public class ParameterMetadata {
     private String parameter;
     private String fullParameterName;
     private String defaultValue;
+    private String comment;
     private Class<? extends Converter> converter;
     private boolean optional;
     private boolean qualified;
     private String qualifier;
     private boolean readOnly;
-    
+    private Double min;
+    private Double max;
+    private String format;
+    private List<Class<? extends ParameterValidator>> validators = new ArrayList<Class<? extends ParameterValidator>>();
+
+    public static String parseQualifier(String fullParameterName, String parameterName) {
+        return fullParameterName.substring(parameterName.length() + 1);
+    }
+
+    public static String createFullName(String parameterName, String qualifier) {
+        return parameterName + "." + qualifier;
+    }
+
     /**
      * parameter name with its qualifier (if has one)
      * 
      * @return
      */
     public String getFullParameterName() {
-        //local variable is necassary for json serialization, so thats why we set the value instead of simply return
+        return this.fullParameterName;
+    }
+
+    private void createFullParameterName() {
         if (qualifier != null) {
             this.fullParameterName = createFullName(parameter, qualifier);
         } else {
             this.fullParameterName = parameter;
         }
-        return this.fullParameterName;
-    }
-    
-    public static String parseQualifier(String fullParameterName, String parameterName) {
-        return fullParameterName.substring(parameterName.length()+1);
-    }
-
-    public static String createFullName(String parameterName, String qualifier) {
-        return parameterName + "." + qualifier;
     }
 
     public String getDefaultValue() {
@@ -90,6 +101,7 @@ public class ParameterMetadata {
 
     public void setParameter(String parameter) {
         this.parameter = parameter;
+        this.createFullParameterName();
     }
 
     public Class<?> getTypeClass() {
@@ -122,12 +134,47 @@ public class ParameterMetadata {
 
     public void setQualifier(String qualifier) {
         this.qualifier = qualifier;
+        this.createFullParameterName();
     }
 
-    @Override
-    public String toString() {
-        return "Metadata [parameter=" + parameter + ", domain=" + domain + ", typeClass=" + typeClass + ", attribute=" + attribute + ", defaultValue=" + defaultValue + ", converter=" + converter
-                + ", optional=" + optional + ", qualified=" + qualified + ", qualifier=" + qualifier + "]";
+    public Double getMin() {
+        return min;
+    }
+
+    public void setMin(Double min) {
+        this.min = min;
+    }
+
+    public Double getMax() {
+        return max;
+    }
+
+    public void setMax(Double max) {
+        this.max = max;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
+    public List<Class<? extends ParameterValidator>> getValidators() {
+        return validators;
+    }
+
+    public void setValidators(List<Class<? extends ParameterValidator>> validators) {
+        this.validators = validators;
+    }
+    
+    public String getComment() {
+        return comment;
+    }
+    
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     @Override
@@ -138,6 +185,13 @@ public class ParameterMetadata {
         result = prime * result + ((parameter == null) ? 0 : parameter.hashCode());
         result = prime * result + ((typeClass == null) ? 0 : typeClass.hashCode());
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ParameterMetadata [attribute=" + attribute + ", parameter=" + parameter + ", domain=" + domain + ", typeClass=" + typeClass + ", defaultValue=" + defaultValue + ", qualified="
+                + qualified + ", qualifier=" + qualifier + ", optional=" + optional + ", readOnly=" + readOnly + ", min=" + min + ", max=" + max + ", format=" + format + ", converter=" + converter
+                + ", validators=" + validators + "]";
     }
 
     public boolean isQualified() {
@@ -169,11 +223,9 @@ public class ParameterMetadata {
     public boolean isReadOnly() {
         return this.readOnly;
     }
-    
+
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
     }
-    
-    
 
 }

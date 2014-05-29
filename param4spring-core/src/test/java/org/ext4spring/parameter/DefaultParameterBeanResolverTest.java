@@ -19,7 +19,9 @@ import java.util.Map;
 
 import org.ext4spring.parameter.annotation.Parameter;
 import org.ext4spring.parameter.annotation.ParameterBean;
+import org.ext4spring.parameter.annotation.ParameterComment;
 import org.ext4spring.parameter.annotation.ParameterQualifier;
+import org.ext4spring.parameter.annotation.ParameterValidation;
 import org.ext4spring.parameter.converter.tv.TVConverter;
 import org.ext4spring.parameter.model.ParameterBeanMetadata;
 import org.junit.Assert;
@@ -41,6 +43,7 @@ public class DefaultParameterBeanResolverTest extends TestBase {
     }
 
     @ParameterBean(domain = "testDomain")
+    @ParameterComment("This is an commented parameter bean")
     private class AnnotatedParameterBean {
         Long longParam;
 
@@ -52,13 +55,14 @@ public class DefaultParameterBeanResolverTest extends TestBase {
         double doubleParam;
 
         @Parameter(name = "double", defaultValue = "10.5")
+        @ParameterValidation(min=10, max=20)
         public double getDoubleParam() {
             return doubleParam;
         }
 
         String optionalStringParam;
 
-        @Parameter(optional = true)
+        @ParameterValidation(optional=true)
         public String getOptionalStringParam() {
             return optionalStringParam;
         }
@@ -72,7 +76,8 @@ public class DefaultParameterBeanResolverTest extends TestBase {
 
         boolean value;
         
-        @Parameter(converter = TVConverter.class, defaultValue = "true", optional = true, name = "differentName")
+        @Parameter(converter = TVConverter.class, defaultValue = "true", name = "differentName")
+        @ParameterValidation(optional=true)
         public Boolean isValue() {
             return false;
         }
@@ -89,7 +94,9 @@ public class DefaultParameterBeanResolverTest extends TestBase {
         Class notAnnotatedClass = Class.forName(NotAnnotatedParameterBean.class.getName());
 
         DefaultParameterBeanResolver parameterBeanResolver = new DefaultParameterBeanResolver();
-        parameterBeanResolver.setParameterResolver(new DefaultParameterResolver());
+        DefaultParameterResolver defaultParameterResolver=new DefaultParameterResolver();
+        defaultParameterResolver.setDefaultConverter(new TVConverter());
+        parameterBeanResolver.setParameterResolver(defaultParameterResolver);
         ParameterBeanMetadata beanMetadata = parameterBeanResolver.parse(notAnnotatedClass);
         Assert.assertEquals("org.ext4spring.parameter.DefaultParameterBeanResolverTest.NotAnnotatedParameterBean", beanMetadata.getDomain());
         Assert.assertEquals(NotAnnotatedParameterBean.class, beanMetadata.getParameterBeanClass());
@@ -105,19 +112,22 @@ public class DefaultParameterBeanResolverTest extends TestBase {
         Class annotatedClass = Class.forName(AnnotatedParameterBean.class.getName());
 
         DefaultParameterBeanResolver parameterBeanResolver = new DefaultParameterBeanResolver();
-        parameterBeanResolver.setParameterResolver(new DefaultParameterResolver());
+        DefaultParameterResolver defaultParameterResolver=new DefaultParameterResolver();
+        defaultParameterResolver.setDefaultConverter(new TVConverter());
+        parameterBeanResolver.setParameterResolver(defaultParameterResolver);
         ParameterBeanMetadata beanMetadata = parameterBeanResolver.parse(annotatedClass);
         Assert.assertEquals("testDomain", beanMetadata.getDomain());
+        Assert.assertEquals("This is an commented parameter bean", beanMetadata.getComment());
+
         Assert.assertTrue(beanMetadata.isQualified());
         Assert.assertEquals(5, beanMetadata.getParameters().size());
         Assert.assertNotNull(beanMetadata.getParameter("longer"));
         Assert.assertNotNull(beanMetadata.getParameter("OptionalStringParam"));
         Assert.assertNotNull(beanMetadata.getParameter("double"));
+        Assert.assertEquals(new Double(10), beanMetadata.getParameter("double").getMin());
+        Assert.assertEquals(new Double(20), beanMetadata.getParameter("double").getMax());
         Assert.assertNotNull(beanMetadata.getParameter("QualifiedParam"));
         Assert.assertNotNull(beanMetadata.getParameter("differentName"));
-        
-        
-        //TODO: test writeable metadata if ParameterMetadata object contains it
     }
 
 }

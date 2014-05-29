@@ -27,7 +27,7 @@ import org.junit.Test;
 public abstract class AbstractConverterTest extends TestBase {
     private static final Log LOGGER = LogFactory.getLog(AbstractConverterTest.class);
 
-    protected abstract ConverterFactory getConverterFactory();
+    protected abstract Converter getConverter();
 
     /**
      * All converter should support these
@@ -37,7 +37,7 @@ public abstract class AbstractConverterTest extends TestBase {
         Map<Class<?>, Object> types=new LinkedHashMap<Class<?>, Object>();
         types.put(Long.class, 2352351241241241242L);
         types.put(Short.class, (short)123);
-        types.put(Integer.class, (int)252352);
+        types.put(Integer.class, 252352);
         types.put(Double.class, 252352.112412d);
         types.put(Float.class, 252352.112412f);
         types.put(Byte.class, (byte)127);
@@ -47,7 +47,7 @@ public abstract class AbstractConverterTest extends TestBase {
     }
     
     protected void testConversion(Class<?> type, Object value) {
-        Converter converter=this.getConverterFactory().getConverter(type);
+        Converter converter=this.getConverter();
         String stringValue=converter.toStringValue(value);
         Object typedValue=converter.toTypedValue(stringValue, type);
         Assert.assertEquals(typedValue, value);

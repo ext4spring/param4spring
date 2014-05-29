@@ -30,7 +30,7 @@ public interface ParameterService {
 
     public Object read(ParameterMetadata metadata, Object methodReturnValue) throws ParameterException;
 
-    public void write(ParameterMetadata metadata, Object value) throws ParameterException;
+    public void write(ParameterMetadata metadata, Object value, Object parameterObject) throws ParameterException;
 
     /**
      * Lists all existing qualifiers in the repository for the given parameter

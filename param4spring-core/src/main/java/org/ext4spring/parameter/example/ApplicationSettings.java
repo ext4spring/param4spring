@@ -20,7 +20,8 @@ import java.util.Date;
 import org.ext4spring.parameter.annotation.Parameter;
 import org.ext4spring.parameter.annotation.ParameterBean;
 import org.ext4spring.parameter.annotation.ParameterQualifier;
-import org.ext4spring.parameter.converter.tv.TVConverter;
+import org.ext4spring.parameter.annotation.ParameterValidation;
+import org.ext4spring.parameter.converter.json.JSONConverter;
 
 /**
  * Example configuration POJO
@@ -84,10 +85,12 @@ public class ApplicationSettings {
         return price;
     }
 
+    @ParameterValidation(min=10, max=20)
     public void setPrice(double price) {
         this.price = price;
     }
 
+    @Parameter(converter=JSONConverter.class)
     public Date getReleaseDate() {
         return releaseDate;
     }
@@ -96,11 +99,11 @@ public class ApplicationSettings {
         this.releaseDate = releaseDate;
     }
 
-    @Parameter(converter = TVConverter.class, optional=true)
     public String getXmlConfig() {
         return xmlConfig;
     }
 
+    @ParameterValidation(optional=true)
     public void setXmlConfig(String xmlConfig) {
         this.xmlConfig = xmlConfig;
     }
@@ -110,7 +113,6 @@ public class ApplicationSettings {
      * @param userName
      * @return
      */
-    @Parameter(converter=TVConverter.class)
     public String getUserColor(@ParameterQualifier String userName){
         return this.userColor;
     }

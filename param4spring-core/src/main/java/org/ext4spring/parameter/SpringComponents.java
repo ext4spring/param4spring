@@ -25,8 +25,10 @@ public interface SpringComponents {
 	public static final String defaultParameterAdvice = "springParamDefaultParameterAdvice";
         public static final String defaultParameterResolver = "springParamDefaultParameterResolver";
         public static final String defaultParameterBeanResolver = "springParamDefaultParameterBeanResolver";
-	public static final String defaultConverterFactory = "springParamDefaultConverterFactory";
+        public static final String defaultConverterFactory = "springParamDefaultConverterFactory";
+        public static final String defaultConverter = "springParamDefaultConverter";
 	public static final String simpleConverterFactory = "springParamSimpleConverterFactory";
 	public static final String javaBeanPointcut = "springParamJavaBeanPointcut";
         public static final String defaultParameterBeanRegistry = "springParamDefaultParameterBeanRegistry";
+        public static final String defaultParameterValidatorFactory="DefaultParameterValidatorFactory";
 }

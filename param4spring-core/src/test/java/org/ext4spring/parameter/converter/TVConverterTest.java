@@ -1,13 +1,13 @@
 package org.ext4spring.parameter.converter;
 
-import org.ext4spring.parameter.converter.tv.TVConverterFactory;
+import org.ext4spring.parameter.converter.tv.TVConverter;
 
 public class TVConverterTest extends AbstractConverterTest {
+    private Converter converter = new TVConverter();
 
     @Override
-    protected ConverterFactory getConverterFactory() {
-        return new TVConverterFactory();
+    protected Converter getConverter() {
+        return converter;
     }
-    
 
 }
