@@ -15,7 +15,7 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
-import java.util.List;
+import java.util.Set;
 
 import org.ext4spring.parameter.exception.ParameterException;
 import org.ext4spring.parameter.model.ParameterMetadata;
@@ -37,7 +37,9 @@ public interface ParameterService {
      * @param metadata
      * @return
      */
-    List<String> getParameterQualifiers(ParameterMetadata metadata);
+    Set<String> getParameterQualifiers(ParameterMetadata metadata);
+
+    public void delete(ParameterMetadata parameterMetadata);
     
     
     

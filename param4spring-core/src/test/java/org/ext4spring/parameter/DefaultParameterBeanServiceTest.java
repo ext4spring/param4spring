@@ -123,4 +123,25 @@ public class DefaultParameterBeanServiceTest extends TestBase {
         applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class);
         Assert.assertEquals("black", applicationSettings.getUserColor(null));
     }
+
+    @Test
+    public void saveQualifiedBeanWithNewQualifier() {
+        ApplicationSettings applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class);
+        applicationSettings.setUserColor("yellow");
+        this.parameterBeanService.writeParameterBean(applicationSettings, "userNew");
+        applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class, "userNew");
+        Assert.assertEquals("yellow", applicationSettings.getUserColor("userNew"));
+        applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class);
+        Assert.assertEquals("black", applicationSettings.getUserColor(null));
+    }
+
+    @Test
+    public void deleteQualifierOfBean() {
+        ApplicationSettings applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class, "user1");
+        Assert.assertEquals("blue", applicationSettings.getUserColor("user1"));
+        this.parameterBeanService.deleteQualifier(ApplicationSettings.class, "user1");
+        applicationSettings=this.parameterBeanService.readParameterBean(ApplicationSettings.class, "user1");
+        Assert.assertEquals("black", applicationSettings.getUserColor("user1"));
+    }
+
 }

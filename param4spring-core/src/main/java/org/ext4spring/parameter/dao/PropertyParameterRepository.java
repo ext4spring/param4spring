@@ -59,7 +59,13 @@ public class PropertyParameterRepository extends AbstractParameterRepository {
     @Override
     public void setValue(ParameterMetadata metadata, String value) {
         //TODO: FEATURE: enable write properties (if we write the whole file, it should be configurable to enable this feature)
-        throw new ParameterException("Write not allowed on PropertyRepository. Parameter:" + metadata);
+        throw new ParameterException("Write not allowed on PropertyRepository. Dont use this repository for writeable parameters. Parameter:" + metadata);
+    }
+
+    @Override
+    public void delete(ParameterMetadata metadata) {
+        //TODO: FEATURE: enable delete properties (if we write the whole file, it should be configurable to enable this feature)
+        throw new ParameterException("Delete of variables from properties not allowed. Dont use this repository for writeable parameters. Parameter: " + metadata);
     }
 
     @Required

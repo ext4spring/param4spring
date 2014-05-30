@@ -257,12 +257,12 @@ public class DefaultParameterServiceTest extends TestBase {
 
         testedRepositoryOrder = new ParameterRepository[] { repoNone, repoReadNotExists, repoReadExists, repoWriteExNotExists, repoWriteAllNotExist, repoWriteExExists, repoWriteAllExist };
         parameterService.setParameterRepositories(new LinkedHashSet<ParameterRepository>(Arrays.asList(testedRepositoryOrder)));
-        ParameterRepository repositoryFound = parameterService.getReadableRepository(metadata);
+        ParameterRepository repositoryFound = parameterService.getReadableRepositoryWhereParameterExists(metadata);
         Assert.assertEquals(repoReadExists, repositoryFound);
 
         testedRepositoryOrder = new ParameterRepository[] { repoNone, repoReadNotExists, repoWriteExExists };
         parameterService.setParameterRepositories(new LinkedHashSet<ParameterRepository>(Arrays.asList(testedRepositoryOrder)));
-        repositoryFound = parameterService.getReadableRepository(metadata);
+        repositoryFound = parameterService.getReadableRepositoryWhereParameterExists(metadata);
         Assert.assertEquals(repoWriteExExists, repositoryFound);
 
     }

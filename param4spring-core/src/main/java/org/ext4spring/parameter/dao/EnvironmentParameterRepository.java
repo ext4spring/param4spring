@@ -31,6 +31,11 @@ public class EnvironmentParameterRepository implements ParameterRepository {
     }
 
     @Override
+    public void delete(ParameterMetadata metadata) {
+        throw new ParameterException("Delete of enviroment variables not allowed. Dont use this repository for writeable parameters. Parameter: " + metadata);
+    }
+    
+    @Override
     public RepositoryMode getMode(String domain) {
         return RepositoryMode.READ_ONLY;
     }

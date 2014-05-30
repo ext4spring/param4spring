@@ -86,5 +86,14 @@ public interface ParameterBeanService {
      * Unique list of all existing qualifiers in the repository for the given parameter class
      */
     Set<String> getQualifiers(Class<?> parameterBeanClass) throws ParameterException;
+    
+    /**
+     * Deletes all qualified values of the parmeter bean
+     * @param parameterBeanClass
+     * @param parameterQualifier Cannot be null
+     * @throws ParameterException
+     */
+    void deleteQualifier(Class<?> parameterBeanClass, String parameterQualifier) throws ParameterException;
+
 
 }

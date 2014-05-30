@@ -15,9 +15,11 @@
  ******************************************************************************/
 package org.ext4spring.parameter;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -55,11 +57,11 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
     public Object read(ParameterMetadata metadata, Object methodReturnValue) {
         LOGGER.debug("Reading parameter:" + metadata);
         Object value = null;
-        ParameterRepository repository = this.getReadableRepository(metadata);
+        ParameterRepository repository = this.getReadableRepositoryWhereParameterExists(metadata);
         if (repository != null) {
             String stringValue = repository.getValue(metadata);
             if (stringValue != null) {
-                value=this.converterFactory.get(metadata.getConverter()).toTypedValue(stringValue, metadata.getTypeClass());
+                value = this.converterFactory.get(metadata.getConverter()).toTypedValue(stringValue, metadata.getTypeClass());
             }
         } else {
             LOGGER.warn("No repository found for: " + metadata);
@@ -67,7 +69,7 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
         if (value == null) {
             if (metadata.getDefaultValue() != null && metadata.getDefaultValue().length() > 0) {
                 // default by annotation
-                value=this.converterFactory.get(metadata.getConverter()).toTypedValue(metadata.getDefaultValue(), metadata.getTypeClass());
+                value = this.converterFactory.get(metadata.getConverter()).toTypedValue(metadata.getDefaultValue(), metadata.getTypeClass());
             } else {
                 // default by real method invocation of parameter bean
                 value = methodReturnValue;
@@ -92,9 +94,17 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
                 repository.setValue(metadata, this.converterFactory.get(metadata.getConverter()).toStringValue(value));
             }
         } else {
-            LOGGER.error("Not writeable repository found for:" + metadata);
             throw new RepositoryNotFoundException("No writeable repository found for:" + metadata);
+        }
+    }
 
+    @Override
+    public void delete(ParameterMetadata metadata) {
+        ParameterRepository repository = this.getWriteableRepository(metadata);
+        if (repository != null) {
+            repository.delete(metadata);
+        } else {
+            throw new RepositoryNotFoundException("Cannot delete parameter. No writeable repository found for:" + metadata);
         }
     }
 
@@ -107,13 +117,12 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
     }
 
     @Override
-    public List<String> getParameterQualifiers(ParameterMetadata metadata) {
-        ParameterRepository repository = this.getReadableRepository(metadata);
-        if (repository != null) {
-            return repository.getParameterQualifiers(metadata);
-        } else {
-            return new ArrayList<String>(0);
+    public Set<String> getParameterQualifiers(ParameterMetadata metadata) {
+        Set<String> qualifiers=new HashSet<String>();
+        for (ParameterRepository repository:this.getAllReadableRepositories(metadata)) {
+            qualifiers.addAll(repository.getParameterQualifiers(metadata));
         }
+        return qualifiers;
     }
 
     @Required
@@ -121,7 +130,18 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
         this.repositories = repositories;
     }
 
-    protected ParameterRepository getReadableRepository(ParameterMetadata metadata) throws ParameterException {
+    protected List<ParameterRepository> getAllReadableRepositories(ParameterMetadata metadata) throws ParameterException {
+        List<ParameterRepository> repositories=new LinkedList<ParameterRepository>();
+        for (ParameterRepository repository : this.repositories) {
+            if (repository.getMode(metadata.getDomain()) != RepositoryMode.NONE) {
+                repositories.add(repository);
+            }
+        }
+        return repositories;
+    }
+
+    
+    protected ParameterRepository getReadableRepositoryWhereParameterExists(ParameterMetadata metadata) throws ParameterException {
         boolean domainFound = false;
         for (ParameterRepository repository : this.repositories) {
             if (repository.getMode(metadata.getDomain()) != RepositoryMode.NONE) {
@@ -178,7 +198,7 @@ public class DefaultParameterService implements ParameterService, ApplicationCon
     @PostConstruct
     public void init() {
         if (this.converterFactory == null) {
-             this.converterFactory = (ConverterFactory) this.applicationContext.getBean(SpringComponents.defaultConverterFactory);
+            this.converterFactory = (ConverterFactory) this.applicationContext.getBean(SpringComponents.defaultConverterFactory);
         }
         if (this.parameterValidatorFactory == null) {
             this.parameterValidatorFactory = (ParameterValidatorFactory) this.applicationContext.getBean(SpringComponents.defaultParameterValidatorFactory);

@@ -59,5 +59,9 @@ public class MockParameterRepository implements ParameterRepository {
 	public List<String> getParameterQualifiers(ParameterMetadata metadata) {
 	    return new ArrayList<String>();
 	}
+	@Override
+	public void delete(ParameterMetadata metadata) {
+	    //nop
+	}
 
 }

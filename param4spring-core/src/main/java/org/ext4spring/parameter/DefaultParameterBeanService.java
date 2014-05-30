@@ -16,7 +16,6 @@
 package org.ext4spring.parameter;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -46,17 +45,6 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
     private ParameterBeanRegistry parameterBeanRegistry;
     private ParameterBeanResolver parameterBeanResolver;
     private ApplicationContext applicationContext;
-
-    private List<Field> getSupportedFields(Class<?> clazz) {
-        List<Field> supportedFields = new ArrayList<Field>();
-        for (Field field : clazz.getDeclaredFields()) {
-            int modifiers = field.getModifiers();
-            if (!Modifier.isStatic(modifiers)) { //!Modifier.isFinal(modifiers) && 
-                supportedFields.add(field);
-            }
-        }
-        return supportedFields;
-    }
 
     @Override
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -98,7 +86,6 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
         } catch (ParameterException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Error happened while reading parameter bean:" + typeClass + "." + e, e);
             throw new ParameterException("Error happened while reading parameter bean:" + typeClass + "." + e, e);
         }
     }
@@ -111,12 +98,12 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
 
     @Override
     public <T> void writeParameterBean(T parameterBean, String parameterQualifier) throws ParameterException {
-        LOGGER.debug("Writing parameters for bean:" + parameterBean + " with qualifier:" + parameterQualifier);
+        LOGGER.info("Writing parameters for bean:" + parameterBean + " with qualifier:" + parameterQualifier);
         try {
             Class<?> typeClass = parameterBean.getClass();
             ParameterBeanMetadata beanMetadata = this.parameterBeanResolver.parse(typeClass);
             for (ParameterMetadata parameterMetadata : beanMetadata.getParameters()) {
-                if (!parameterMetadata.isReadOnly()) { 
+                if (!parameterMetadata.isReadOnly()) {
                     Field field = this.findField(typeClass, parameterMetadata.getAttribute());
                     field.setAccessible(true);
                     if (parameterMetadata.isQualified()) {
@@ -131,10 +118,30 @@ public class DefaultParameterBeanService implements ParameterBeanService, Applic
         } catch (ParameterException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Error happened while writing parameter bean:" + parameterBean + "." + e, e);
             throw new ParameterException("Error happened while writing parameter bean:" + parameterBean + "." + e, e);
         }
 
+    }
+
+    @Override
+    public void deleteQualifier(Class<?> parameterBeanClass, String parameterQualifier) throws ParameterException {
+        LOGGER.info("Deleting qualifier:" + parameterQualifier + " of bean:" + parameterBeanClass);
+        if (parameterQualifier == null) {
+            throw new ParameterException("Delete of default (null) qualifier is not allowed.");
+        }
+        try {
+            ParameterBeanMetadata beanMetadata = this.parameterBeanResolver.parse(parameterBeanClass);
+            for (ParameterMetadata parameterMetadata : beanMetadata.getParameters()) {
+                if (!parameterMetadata.isReadOnly() && parameterMetadata.isQualified()) {
+                    parameterMetadata.setQualifier(parameterQualifier);
+                    this.parameterService.delete(parameterMetadata);
+                }
+            }
+        } catch (ParameterException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ParameterException("Error happened while deleting qualifier:"+parameterQualifier+" of bean:" + parameterBeanClass + "." + e, e);
+        }
     }
 
     @Override

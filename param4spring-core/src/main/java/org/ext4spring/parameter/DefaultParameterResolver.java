@@ -189,7 +189,7 @@ public class DefaultParameterResolver implements ParameterResolver {
         if (validationComment != null) {
             return validationComment.value();
         }
-        return null;
+        return "";
     }
     
     private List<Class<? extends ParameterValidator>> resolveValidators(Method method, String attributeName) {

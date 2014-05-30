@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.ext4spring.parameter.model.ParameterMetadata;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -31,16 +32,19 @@ public class JdbcParameterRepository extends AbstractParameterRepository {
 
     private final String DEFAULT_COUNT_QUERY = "SELECT count(*) FROM parameters WHERE domain=:domain AND parameter=:parameter";
     private final String DEFAULT_SELECT_QUERY = "SELECT data FROM parameters WHERE domain=:domain AND parameter=:parameter";
-    private final String DEFAULT_INSERT_QUERY = "INSERT INTO parameters(domain, parameter, data) VALUES(:domain,:parameter,:data)";
-    private final String DEFAULT_UPDATE_QUERY = "UPDATE parameters SET data=:data WHERE domain=:domain AND parameter=:parameter";
+    private final String DEFAULT_INSERT_STATEMENT = "INSERT INTO parameters(domain, parameter, data) VALUES(:domain,:parameter,:data)";
+    private final String DEFAULT_UPDATE_STATEMENT = "UPDATE parameters SET data=:data WHERE domain=:domain AND parameter=:parameter";
     private final String DEFAULT_QUALIFIER_QUERY = "SELECT parameters.PARAMETER FROM parameters WHERE DOMAIN=:domain AND PARAMETER LIKE :parameterPrefix";
+    private final String DEFAULT_DELETE_STATEMENT = "DELETE FROM parameters WHERE domain=:domain AND parameter=:parameter";
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private String countQuery = DEFAULT_COUNT_QUERY;
     private String selectQuery = DEFAULT_SELECT_QUERY;
-    private String insertStatement = DEFAULT_INSERT_QUERY;
-    private String updateStatement = DEFAULT_UPDATE_QUERY;
+    private String insertStatement = DEFAULT_INSERT_STATEMENT;
+    private String updateStatement = DEFAULT_UPDATE_STATEMENT;
+    private String qualifierQuery = DEFAULT_QUALIFIER_QUERY;
+    private String deleteStatement = DEFAULT_DELETE_STATEMENT;
 
     @Required
     public void setDataSource(DataSource dataSource) {
@@ -60,7 +64,7 @@ public class JdbcParameterRepository extends AbstractParameterRepository {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         namedParameters.addValue("domain", metadata.getDomain());
         namedParameters.addValue("parameterPrefix", metadata.getParameter()+".%");
-        List<String> paramsWithQualifier=namedParameterJdbcTemplate.queryForList(DEFAULT_QUALIFIER_QUERY, namedParameters, String.class);
+        List<String> paramsWithQualifier=namedParameterJdbcTemplate.queryForList(this.qualifierQuery, namedParameters, String.class);
         List<String> qualifiers=new ArrayList<String>();
         for (String paramFullName:paramsWithQualifier) {
             qualifiers.add(ParameterMetadata.parseQualifier(paramFullName, metadata.getParameter()));
@@ -73,7 +77,11 @@ public class JdbcParameterRepository extends AbstractParameterRepository {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         namedParameters.addValue("domain", metadata.getDomain());
         namedParameters.addValue("parameter", metadata.getFullParameterName());
-        return namedParameterJdbcTemplate.queryForObject(this.selectQuery, namedParameters, String.class);
+        try {
+            return namedParameterJdbcTemplate.queryForObject(this.selectQuery, namedParameters, String.class);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override
@@ -89,4 +97,37 @@ public class JdbcParameterRepository extends AbstractParameterRepository {
         }
     }
 
+    @Override
+    public void delete(ParameterMetadata metadata) {
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("domain", metadata.getDomain());
+        parameters.put("parameter", metadata.getFullParameterName());
+        this.namedParameterJdbcTemplate.update(this.deleteStatement, parameters);
+    }
+
+    public void setCountQuery(String countQuery) {
+        this.countQuery = countQuery;
+    }
+
+    public void setSelectQuery(String selectQuery) {
+        this.selectQuery = selectQuery;
+    }
+
+    public void setInsertStatement(String insertStatement) {
+        this.insertStatement = insertStatement;
+    }
+
+    public void setUpdateStatement(String updateStatement) {
+        this.updateStatement = updateStatement;
+    }
+
+    public void setQualifierQuery(String qualifierQuery) {
+        this.qualifierQuery = qualifierQuery;
+    }
+
+    public void setDeleteStatement(String deleteStatement) {
+        this.deleteStatement = deleteStatement;
+    }
+    
+    
 }
